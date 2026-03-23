@@ -13,6 +13,7 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value }) => {
             theme="vs-dark"
             defaultLanguage={language}
             defaultValue={value}
+            value={value}
         />
     );
 };

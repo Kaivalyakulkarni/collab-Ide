@@ -8,8 +8,8 @@ export interface FileNode {
 
 interface FileTreeProps {
   files: FileNode[]
+  onFileSelect: (file: FileNode) => void
 }
-
 
 export const mockFiles: FileNode[] = [
     {
@@ -40,11 +40,11 @@ export const mockFiles: FileNode[] = [
 ]
 
 
-const FileTree: React.FC<FileTreeProps> = ({ files }) => {
+const FileTree: React.FC<FileTreeProps> = ({ files , onFileSelect}) => {
     const renderTree = (nodes: FileNode[]) => {
         return nodes.map((node) => (
             <div key={node.name} style={{ marginLeft: "20px" }}>
-                <div>{node.name}</div>
+                <div onClick={() => node.type === "file" && onFileSelect(node)} style={{cursor:"pointer"}}>{node.name}</div>
                 {node.type === "folder" && node.children && renderTree(node.children)}
             </div>
         ));
