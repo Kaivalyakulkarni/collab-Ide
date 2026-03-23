@@ -1,14 +1,15 @@
 "use client"
 
 export interface FileNode {
-  name: string
-  type: "file" | "folder"
-  children?: FileNode[]
+    name: string
+    type: "file" | "folder"
+    children?: FileNode[]
 }
 
 interface FileTreeProps {
-  files: FileNode[]
-  onFileSelect: (file: FileNode) => void
+    files: FileNode[]
+    onFileSelect: (file: FileNode) => void
+    selectedFile?: string
 }
 
 export const mockFiles: FileNode[] = [
@@ -40,11 +41,19 @@ export const mockFiles: FileNode[] = [
 ]
 
 
-const FileTree: React.FC<FileTreeProps> = ({ files , onFileSelect}) => {
+const FileTree: React.FC<FileTreeProps> = ({ files, onFileSelect, selectedFile }) => {
+    console.log("selectedFile prop:", selectedFile)
     const renderTree = (nodes: FileNode[]) => {
         return nodes.map((node) => (
             <div key={node.name} style={{ marginLeft: "20px" }}>
-                <div onClick={() => node.type === "file" && onFileSelect(node)} style={{cursor:"pointer"}}>{node.name}</div>
+                <div onClick={() => node.type === "file" && onFileSelect(node)}
+                    style={{ // Basic styling for file/folder names
+                        cursor: "pointer",
+                        backgroundColor: selectedFile === node.name ? "#094771" : "transparent",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        color: selectedFile === node.name ? "white" : "inherit"
+                    }}>{node.name}</div>
                 {node.type === "folder" && node.children && renderTree(node.children)}
             </div>
         ));

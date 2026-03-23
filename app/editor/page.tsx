@@ -13,7 +13,7 @@ export default function EditorPage() {
     return (
         <div style={{ display: "flex", height: "100vh" }}>
             <div style={{ width: "250px", borderRight: "1px solid #ccc", padding: "10px" }}>
-                <FileTree files={mockFiles} onFileSelect={setSelectedFile} />
+                <FileTree files={mockFiles} onFileSelect={setSelectedFile} selectedFile={selectedFile?.name} />
             </div>
             <div style={{ flex: 1 }}>
                 <EditorComponent
