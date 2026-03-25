@@ -2,17 +2,19 @@ import { prisma } from "@/lib/db";
 
 export async function GET(
     request: Request,
-    { params }: { params: { projectId: string } }
+    { params }: { params: Promise<{ projectId: string }> }
 ) {
+    const { projectId } = await params
     try {
         const files = await prisma.file.findMany({
-            where: {
-                projectId: params.projectId
-            }
+            where: { projectId }
         });
-        return new Response(JSON.stringify({ files }), { status: 200 });
+        const filesWithType = files.map(file => ({
+            ...file,
+            type: "file" as const
+        }))
+        return Response.json({ files: filesWithType })
     } catch (error) {
-        console.error("Error fetching files:", error);
-        return new Response(JSON.stringify({ error: "Failed to fetch files" }), { status: 500 });
+        return Response.json({ error: "Failed to fetch files" }, { status: 500 })
     }
 }

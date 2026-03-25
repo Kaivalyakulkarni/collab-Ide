@@ -4,6 +4,7 @@ export interface FileNode {
     name: string
     type: "file" | "folder"
     children?: FileNode[]
+    content?: string // For files, we can store the content here
 }
 
 interface FileTreeProps {
