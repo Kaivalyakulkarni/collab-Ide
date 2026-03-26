@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/db";
+import { NextRequest } from "next/server";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { projectId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ projectId: string }> }
 ) {
-  const { projectId } = params;
+  const { projectId } = await context.params;
 
   try {
     const files = await prisma.file.findMany({
