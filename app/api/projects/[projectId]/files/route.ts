@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import type { File } from "@prisma/client";
 
 export async function GET(
     request: Request,
@@ -9,7 +10,7 @@ export async function GET(
         const files = await prisma.file.findMany({
             where: { projectId }
         });
-        const filesWithType = files.map(file => ({
+        const filesWithType = files.map((file: File) => ({
             ...file,
             type: "file" as const
         }))
