@@ -1,6 +1,7 @@
 "use client"
 
 export interface FileNode {
+    id : string
     name: string
     type: "file" | "folder"
     children?: FileNode[]
@@ -15,22 +16,27 @@ interface FileTreeProps {
 
 export const mockFiles: FileNode[] = [
     {
+        id:"mock-root",
         name: "src",
         type: "folder",
         children: [
             {
+                id:"mock-1",
                 name: "index.tsx",
                 type: "file"
             },
             {
+                id:"mock-2",
                 name: "App.tsx",
                 type: "file"
             },
             {
+                id:"mock-3",
                 name: "components",
                 type: "folder",
                 children: [
                     {
+                        id:"mock-4",
                         name: "Editor.tsx",
                         type: "file"
                     }
