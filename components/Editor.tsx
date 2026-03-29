@@ -11,9 +11,10 @@ import Editor from "@monaco-editor/react";
 interface EditorProps {
     language: string;
     value: string;
+    projectId: string;
 }
 
-const EditorComponent: React.FC<EditorProps> = ({ language, value }) => {
+const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId }) => {
     return (
         <Editor
             height="100%"
@@ -23,8 +24,9 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value }) => {
             value={value}
             onMount={(editor) => {
                 const doc = new Y.Doc();
-                const provider = new WebsocketProvider("ws://localhost:1234", // our server
-                    "monaco-demo-room", // room name
+                const provider = new WebsocketProvider(
+                    "ws://localhost:1234", // our server
+                    projectId, // room name
                     doc);
                 const type = doc.getText("monaco");  // Yjs text type
                 const monacoBinding = new MonacoBinding(
