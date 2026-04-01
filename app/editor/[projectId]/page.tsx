@@ -6,6 +6,9 @@ import FileTree from "@/components/FileTree";
 import { use, useEffect, useState, useRef } from "react";
 import { FileNode } from "@/components/FileTree";
 
+import { useSession } from "next-auth/react";
+
+
 const EditorComponent = dynamic(() => import("@/components/Editor"), { ssr: false });
 
 export default function EditorPage({ params }: { params: Promise<{ projectId: string }> }) {
@@ -47,21 +50,42 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
         }, 1000)
     }
 
+    const { data: session } = useSession()
+
+    const [users, setUsers] = useState<{ name: string, color: string }[]>([])
 
     return (
         <div style={{ display: "flex", height: "100vh" }}>
-            <div style={{ width: "250px", borderRight: "1px solid #ccc", padding: "10px" }}>
-                <FileTree files={files} onFileSelect={handleFileSelect} selectedFile={selectedFile?.name} />            </div>
-            <div style={{ flex: 1 }}>
-                <EditorComponent
-                    language="javascript"
-                    value={selectedFile ? selectedFile.content || "" : "// Select a file to start coding"}
-                    projectId={projectId}
-                    fileId={selectedFile?.id}
-                    onContentChange={handleContentChange}
-                />
+            {/* Sidebar */}
+            <div style={{ width: "250px", borderRight: "1px solid #ccc", padding: "10px", flexShrink: 0 }}>
+                <FileTree files={files} onFileSelect={handleFileSelect} selectedFile={selectedFile?.name} />
             </div>
 
+            {/* Right side — column layout */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+
+                {/* Presence bar */}
+                <div style={{ height: "40px", background: "#1e1e1e", borderBottom: "1px solid #333", display: "flex", alignItems: "center", padding: "0 12px", gap: "8px" }}>
+                    {[...new Map(users.map(u => [u.name, u])).values()].map((user) => (
+                        <div key={user.name} title={user.name} style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: user.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", color: "#000" }}>
+                            {user.name?.[0]?.toUpperCase() || "U"}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Editor */}
+                <div style={{ flex: 1 }}>
+                    <EditorComponent
+                        language="javascript"
+                        value={selectedFile ? selectedFile.content || "" : "// Select a file to start coding"}
+                        projectId={projectId}
+                        fileId={selectedFile?.id}
+                        onContentChange={handleContentChange}
+                        userName={session?.user?.name || "Unknown User"}
+                        onAwarenessChange={setUsers}
+                    />
+                </div>
+            </div>
         </div>
     );
 }

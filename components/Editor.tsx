@@ -13,10 +13,12 @@ interface EditorProps {
     value: string;
     projectId: string;
     fileId?: string;
-    onContentChange?: (content: string) => void
+    onContentChange?: (content: string) => void;
+    userName?: string;
+    onAwarenessChange?: (users: { name: string, color: string }[]) => void
 }
 
-const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, onContentChange, fileId }) => {
+const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, onContentChange, fileId, userName, onAwarenessChange }) => {
     return (
         <Editor
             height="100%"
@@ -49,6 +51,20 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
                     new Set([editor]),
                     provider.awareness
                 )
+
+                provider.awareness.setLocalStateField("user", {
+                    name: userName || "Unknown User",
+                    color: "#" + Math.floor(Math.random() * 16777215).toString(16) // random color
+                })
+
+                provider.awareness.on('change', () => {
+                    const states = provider.awareness.getStates()
+                    const users = Array.from(states.values())
+                        .filter(state => state.user)
+                        .map(state => state.user)
+                    onAwarenessChange?.(users)
+                })
+
             }}
         />
     );
