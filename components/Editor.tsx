@@ -7,6 +7,8 @@ import { MonacoBinding } from "y-monaco";
 
 import Editor from "@monaco-editor/react";
 
+import type * as Monaco from "@monaco-editor/react"
+
 
 interface EditorProps {
     language: string;
@@ -26,7 +28,7 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
             defaultLanguage={language}
             defaultValue={value}
             value={value}
-            onMount={(editor) => {
+            onMount={(editor, monaco) => {
 
                 const doc = new Y.Doc();
                 const provider = new WebsocketProvider(
@@ -52,18 +54,77 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
                     provider.awareness
                 )
 
+                const decorationsCollection = editor.createDecorationsCollection([])
+
                 provider.awareness.setLocalStateField("user", {
                     name: userName || "Unknown User",
                     color: "#" + Math.floor(Math.random() * 16777215).toString(16) // random color
                 })
 
+
+                editor.onDidChangeCursorPosition((e) => {
+                    const position = editor.getPosition();
+                    provider.awareness.setLocalStateField("cursor", {
+                        line: position?.lineNumber,
+                        column: position?.column
+                    })
+                })
+
+                const styleE1 = document.createElement("style")
+                document.head.appendChild(styleE1)
+
                 provider.awareness.on('change', () => {
                     const states = provider.awareness.getStates()
+
+                    // generate CSS for each remote user's color
+                    const css = Array.from(states.values())
+                        .filter(state => state.user)
+                        .map(state => {
+                            const color = state.user.color
+                            const cls = color.replace('#', '')
+                            return `
+                              .cursor-${cls} { 
+                                  border-left: 2px solid ${color} !important; 
+                              }
+                              .cursor-label-${cls}::before { 
+                                  content: '${state.user.name}';
+                                  background: ${color};
+                                  color: #000;
+                                  font-size: 10px;
+                                  padding: 1px 4px;
+                                  border-radius: 2px;
+                                  position: absolute;
+                                  top: -16px;
+                                  white-space: nowrap;
+                              }
+                          `
+                        }).join('')
+                     styleE1.innerHTML = css   
+
                     const users = Array.from(states.values())
                         .filter(state => state.user)
                         .map(state => state.user)
                     onAwarenessChange?.(users)
+
+                    const decorations = Array.from(states.entries())
+                        .filter(([clientId, state]) => clientId !== provider.awareness.clientID && state.cursor && state.user) // exclude local user
+                        .map(([_, state]) => ({
+                            range: new monaco.Range(
+                                state.cursor.line,
+                                state.cursor.column,
+                                state.cursor.line,
+                                state.cursor.column + 1
+                            ),
+                            options: {
+                                className: `cursor-${state.user.color.replace('#', '')}`,
+                                beforeContentClassName: `cursor-label-${state.user.color.replace('#', '')}`,
+                                stickiness: 1
+                            }
+                        }))
+                    decorationsCollection.set(decorations)
                 })
+
+
 
             }}
         />
