@@ -8,6 +8,8 @@ import { FileNode } from "@/components/FileTree";
 
 import { useSession } from "next-auth/react";
 
+import TerminalComponent from "@/components/Terminal"
+
 
 const EditorComponent = dynamic(() => import("@/components/Editor"), { ssr: false });
 
@@ -84,6 +86,10 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
                         userName={session?.user?.name || "Unknown User"}
                         onAwarenessChange={setUsers}
                     />
+                </div>
+                {/* Terminal */}
+                <div style={{ height: "300px", borderTop: "1px solid #ccc" }}>
+                    <TerminalComponent />   
                 </div>
             </div>
         </div>
