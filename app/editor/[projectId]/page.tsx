@@ -88,7 +88,7 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
                     />
                 </div>
                 {/* Terminal */}
-                <div style={{ height: "300px", borderTop: "1px solid #ccc" }}>
+                <div style={{ height: "300px", borderTop: "1px solid #ccc", padding: "10px" }}>
                     <TerminalComponent />   
                 </div>
             </div>
