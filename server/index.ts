@@ -4,7 +4,6 @@ import { WebSocketServer } from "ws"
 import { setupWSConnection } from "y-websocket/bin/utils"
 
 import *as pty from "node-pty"
-import * as os from "os"
 
 const port = process.env.PORT || 1234
 const server = createServer()
@@ -12,11 +11,16 @@ const wss = new WebSocketServer({ server })
 
 wss.on("connection", (ws, req) => {
     const url = req.url || ""
-    if(url.startsWith("/terminal")){
+    if (url.startsWith("/terminal")) {
         // Handle terminal connections separately if needed
-        const shell = os.platform() === "win32" ? "powershell.exe" : "bash"
-        const ptyProcess = pty.spawn(shell, [], {
-            name:"xterm-color",
+        const ptyProcess = pty.spawn("docker", [
+            "run", "--rm", "-it",
+            "--memory", "256m",      // limit RAM
+            "--cpus", "0.5",         // limit CPU
+            "node:18-alpine",
+            "/bin/sh"
+        ], {
+            name: "xterm-color",
             cols: 80,
             rows: 24,
             cwd: process.env.HOME || process.cwd(),
@@ -33,7 +37,7 @@ wss.on("connection", (ws, req) => {
         })
 
 
-    }else{
+    } else {
         setupWSConnection(ws, req)
     }
 })
