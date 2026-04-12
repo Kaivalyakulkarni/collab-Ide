@@ -30,7 +30,14 @@ wss.on("connection", (ws, req) => {
             ws.send(data)
         })
         ws.on("message", msg => {
-            ptyProcess.write(msg.toString())
+            try {
+                const data = JSON.parse(msg.toString())
+                if (data.type === "resize") {
+                    ptyProcess.resize(data.cols, data.rows)
+                }
+            } catch {
+                ptyProcess.write(msg.toString())
+            }
         })
         ws.on("close", () => {
             ptyProcess.kill()
