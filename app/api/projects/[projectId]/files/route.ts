@@ -6,7 +6,7 @@ export async function GET(
   context: { params: Promise<{ projectId: string }> }
 ) {
   const { projectId } = await context.params;
-
+ 
   try {
     const files = await prisma.file.findMany({
       where: { projectId },
