@@ -4,7 +4,6 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
-// Separate plain client for NextAuth adapter
 const authPrisma = new PrismaClient({
     adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! })
 })
@@ -12,6 +11,9 @@ const authPrisma = new PrismaClient({
 export const { auth, signIn, signOut, handlers } = NextAuth({
     adapter: PrismaAdapter(authPrisma),
     providers: [GitHub],
+    logger: {
+        error: (error) => console.error("[NextAuth Error]", error)
+    },
     callbacks: {
         session({ session, token }) {
             if (token?.sub) {
