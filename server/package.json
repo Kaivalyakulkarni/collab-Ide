@@ -19,6 +19,7 @@
     "y-websocket": "^2.1.0"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "tsx": "^4.21.0",
     "typescript": "^5.0.0"
   }
