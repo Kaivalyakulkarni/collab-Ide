@@ -24,8 +24,8 @@ const TerminalComponent = ({ onReady }: TerminalProps) => {
 
         onReady?.(() => fitAddon.fit())
 
-        const ws = new WebSocket("ws://localhost:1234/terminal")
-
+        const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234"}/terminal`)
+        
         const handleResize = () => {
             fitAddon.fit()
             if (ws.readyState === WebSocket.OPEN) {

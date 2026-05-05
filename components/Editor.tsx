@@ -32,7 +32,7 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
 
                 const doc = new Y.Doc();
                 const provider = new WebsocketProvider(
-                    "ws://localhost:1234", // our server
+                    process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234", // our server
                     fileId || projectId, // room name
                     doc);
                 const type = doc.getText("monaco");  // Yjs text type
