@@ -25,7 +25,17 @@ const TerminalComponent = ({ onReady }: TerminalProps) => {
         onReady?.(() => fitAddon.fit())
 
         const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234"}/terminal`)
-        
+
+        ws.onerror = () => {
+            term.write("\r\n\x1b[33mTerminal unavailable in production.\x1b[0m\r\n")
+        }
+
+        ws.onclose = (event) => {
+            if (event.code !== 1000) {
+                term.write("\r\n\x1b[33mTerminal unavailable in production.\x1b[0m\r\n")
+            }
+        }
+
         const handleResize = () => {
             fitAddon.fit()
             if (ws.readyState === WebSocket.OPEN) {
