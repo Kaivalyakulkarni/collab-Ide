@@ -37,7 +37,7 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
                     doc);
                 const type = doc.getText("monaco");  // Yjs text type
 
-                type.observe(() => {
+                type.observe(() => { 
                     console.log("Yjs changed:", type.toString())
                     onContentChange?.(type.toString())
                 })
