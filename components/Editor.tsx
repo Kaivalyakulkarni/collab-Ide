@@ -3,11 +3,14 @@
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket"
 import { MonacoBinding } from "y-monaco";
+import { useRef } from "react"
 
 
 import Editor from "@monaco-editor/react";
 
 import type * as Monaco from "@monaco-editor/react"
+
+import type { editor, languages, Position } from "monaco-editor"
 
 
 interface EditorProps {
@@ -21,6 +24,8 @@ interface EditorProps {
 }
 
 const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, onContentChange, fileId, userName, onAwarenessChange }) => {
+    const languageRef = useRef(language)      // create the ref
+    languageRef.current = language
     return (
         <Editor
             height="100%"
@@ -37,7 +42,7 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
                     doc);
                 const type = doc.getText("monaco");  // Yjs text type
 
-                type.observe(() => { 
+                type.observe(() => {
                     console.log("Yjs changed:", type.toString())
                     onContentChange?.(type.toString())
                 })
@@ -99,7 +104,7 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
                               }
                           `
                         }).join('')
-                     styleE1.innerHTML = css   
+                    styleE1.innerHTML = css
 
                     const users = Array.from(states.values())
                         .filter(state => state.user)
@@ -124,8 +129,57 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
                     decorationsCollection.set(decorations)
                 })
 
+                const completionTimer = { current: null as ReturnType<typeof setTimeout> | null }
+
+                monaco.languages.registerInlineCompletionsProvider(
+                    { pattern: "**" },
+                    {
+                        provideInlineCompletions: (model: editor.ITextModel, position: Position) => {
+                            const code = model.getValueInRange({
+                                startLineNumber: 1,
+                                startColumn: 1,
+                                endLineNumber: position.lineNumber,
+                                endColumn: position.column
+                            })
 
 
+                            return new Promise((resolve) => {
+                                if (completionTimer.current) {
+                                    clearTimeout(completionTimer.current)
+                                }
+
+                                completionTimer.current = setTimeout(async () => {
+                                    try {
+                                        const response = await fetch("/api/ai/complete", {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json"
+                                            },
+                                            body: JSON.stringify({ code, language: languageRef.current })
+                                        })
+                                        const { completion } = await response.json()
+
+                                        resolve({
+                                            items: [{
+                                                insertText: completion,
+                                                range: {
+                                                    startLineNumber: position.lineNumber,
+                                                    startColumn: position.column,
+                                                    endLineNumber: position.lineNumber,
+                                                    endColumn: position.column
+                                                }
+                                            }]
+                                        })
+
+                                    } catch (error) {
+                                        resolve({ items: [] }) // Return empty completions on error
+                                    }
+                                }, 600) // Adjust the delay as needed
+                            })
+                        },
+                        freeInlineCompletions: () => {}
+                    }
+                )
             }}
         />
     );
