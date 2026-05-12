@@ -5,10 +5,7 @@ import { WebsocketProvider } from "y-websocket"
 import { MonacoBinding } from "y-monaco";
 import { useRef } from "react"
 
-
 import Editor from "@monaco-editor/react";
-
-import type * as Monaco from "@monaco-editor/react"
 
 import type { editor, languages, Position } from "monaco-editor"
 

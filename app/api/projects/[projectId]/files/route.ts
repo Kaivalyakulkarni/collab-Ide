@@ -19,6 +19,7 @@ export async function GET(
 
     return Response.json({ files: filesWithType });
   } catch (error) {
+     console.error("[Files API Error]", error)
     return Response.json(
       { error: "Failed to fetch files" },
       { status: 500 }

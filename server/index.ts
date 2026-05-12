@@ -13,21 +13,28 @@ wss.on("connection", (ws, req) => {
     const url = req.url || ""
     if (url.startsWith("/terminal")) {
         // Handle terminal connections separately if needed
-        const ptyProcess = pty.spawn("docker", [
+        // console.log("[PTY] Spawning docker...")
+        // console.log("[PTY] PATH:", process.env.PATH)
+        const dockerPath = process.platform === "win32"
+            ? "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe"
+            : "docker"
+
+        const ptyProcess = pty.spawn(dockerPath, [
             "run", "--rm", "-it",
-            "--memory", "256m",      // limit RAM
-            "--cpus", "0.5",         // limit CPU
+            "--memory", "256m",
+            "--cpus", "0.5",
             "node:18-alpine",
             "/bin/sh"
         ], {
             name: "xterm-color",
             cols: 80,
             rows: 24,
-            cwd: process.env.HOME || process.cwd(),
+            cwd: process.cwd(),
             env: process.env as { [key: string]: string }
         })
         ptyProcess.onData(data => {
             ws.send(data)
+
         })
         ws.on("message", msg => {
             try {
@@ -35,10 +42,14 @@ wss.on("connection", (ws, req) => {
                 if (data.type === "resize") {
                     ptyProcess.resize(data.cols, data.rows)
                 }
+                else if(data.type === "init") {
+                    ptyProcess.write(`cat > /tmp/file.js << 'EOF'\n${data.content}\nEOF\n`)
+                }
             } catch {
                 ptyProcess.write(msg.toString())
             }
         })
+
         ws.on("close", () => {
             ptyProcess.kill()
         })

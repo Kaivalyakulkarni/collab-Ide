@@ -6,10 +6,14 @@ import { FitAddon } from "@xterm/addon-fit"
 import "@xterm/xterm/css/xterm.css"
 
 interface TerminalProps {
-    onReady?: (fit: () => void) => void
+    onReady?: (fit: () => void) => void;
+    onInitReady?: (sendInit: (content: string, language: string) => void) => void;
+    fileId?: string;
+    content?: string;
+    language?: string;
 }
 
-const TerminalComponent = ({ onReady }: TerminalProps) => {
+const TerminalComponent = ({ onReady, fileId, content, language, onInitReady }: TerminalProps) => {
     const terminalRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -25,6 +29,14 @@ const TerminalComponent = ({ onReady }: TerminalProps) => {
         onReady?.(() => fitAddon.fit())
 
         const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234"}/terminal`)
+
+        onInitReady?.((content, language) => {
+            ws.send(JSON.stringify({
+                type: "init",
+                content,
+                language
+            }))
+        })
 
         ws.onerror = () => {
             term.write("\r\n\x1b[33mTerminal unavailable in production.\x1b[0m\r\n")

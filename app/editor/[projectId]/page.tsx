@@ -64,6 +64,8 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
 
     const fitTerminal = useRef<(() => void) | null>(null)
 
+    const sendInitRef = useRef<((content: string, language: string) => void) | null>(null)
+
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isDragging.current) return
@@ -72,8 +74,8 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
             const containerRect = container.getBoundingClientRect()
             const newHeight = containerRect.bottom - e.clientY
             // clamp between 100px and 600px
-           setTerminalHeight(Math.min(500, Math.max(100, newHeight)))
-           fitTerminal.current?.()
+            setTerminalHeight(Math.min(500, Math.max(100, newHeight)))
+            fitTerminal.current?.()
         }
 
         const handleMouseUp = () => {
@@ -81,13 +83,19 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
         }
 
         window.addEventListener("mousemove", handleMouseMove)
-        window.addEventListener("mouseup", handleMouseUp)
+        window.addEventListener("mouseup", handleMouseUp)  
 
         return () => {
             window.removeEventListener("mousemove", handleMouseMove)
             window.removeEventListener("mouseup", handleMouseUp)
         }
     }, [])
+
+    useEffect(() => {
+        if(selectedFile){
+            sendInitRef.current?.(selectedFile.content || "", "javascript")
+        }
+    },[selectedFile])
 
 
     return (
@@ -139,10 +147,15 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
                         borderTop: "1px solid #ccc",
                         padding: "8px",
                         background: "#111111",
-                        overflow:"hidden"
+                        overflow: "hidden"
                     }}>
                         <div style={{ height: "102%" }}>
-                            <TerminalComponent onReady={(fit) =>{fitTerminal.current = fit}} />
+                            <TerminalComponent
+                                onReady={(fit) => { fitTerminal.current = fit }}
+                                content={selectedFile?.content || ""}
+                                language="javascript"
+                                onInitReady={(sendInit) => { sendInitRef.current = sendInit }}
+                            />
                         </div>
                     </div>
                 )}
