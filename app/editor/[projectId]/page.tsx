@@ -49,6 +49,8 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
                 .then(res => res.json())
                 .then(data => console.log("Saved:", data))
                 .catch(err => console.error("Error:", err))
+            
+             sendInitRef.current?.(content, "javascript", selectedFileRef.current!.name)   
         }, 1000)
     }
 
@@ -64,7 +66,7 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
 
     const fitTerminal = useRef<(() => void) | null>(null)
 
-    const sendInitRef = useRef<((content: string, language: string) => void) | null>(null)
+    const sendInitRef = useRef<((content: string, language: string, fileName: string) => void) | null>(null)
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -93,7 +95,7 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
 
     useEffect(() => {
         if(selectedFile){
-            sendInitRef.current?.(selectedFile.content || "", "javascript")
+            sendInitRef.current?.(selectedFile.content || "", "javascript",selectedFile.name)
         }
     },[selectedFile])
 

@@ -7,7 +7,7 @@ import "@xterm/xterm/css/xterm.css"
 
 interface TerminalProps {
     onReady?: (fit: () => void) => void;
-    onInitReady?: (sendInit: (content: string, language: string) => void) => void;
+    onInitReady?: (sendInit: (content: string, language: string, fileName: string) => void) => void;
     fileId?: string;
     content?: string;
     language?: string;
@@ -30,11 +30,12 @@ const TerminalComponent = ({ onReady, fileId, content, language, onInitReady }: 
 
         const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234"}/terminal`)
 
-        onInitReady?.((content, language) => {
+        onInitReady?.((content, language, fileName) => {
             ws.send(JSON.stringify({
                 type: "init",
                 content,
-                language
+                language,
+                fileName
             }))
         })
 

@@ -43,7 +43,10 @@ wss.on("connection", (ws, req) => {
                     ptyProcess.resize(data.cols, data.rows)
                 }
                 else if(data.type === "init") {
-                    ptyProcess.write(`cat > /tmp/file.js << 'EOF'\n${data.content}\nEOF\n`)
+                    ptyProcess.write(`cat > /tmp/${data.fileName} << 'EOF'\n${data.content}\nEOF\n`)
+                    setTimeout(() => {
+                        ptyProcess.write(`clear\n`)
+                    },500)
                 }
             } catch {
                 ptyProcess.write(msg.toString())
