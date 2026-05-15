@@ -18,6 +18,7 @@ interface EditorProps {
     onContentChange?: (content: string) => void;
     userName?: string;
     onAwarenessChange?: (users: { name: string, color: string }[]) => void
+    
 }
 
 const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, onContentChange, fileId, userName, onAwarenessChange }) => {
@@ -27,7 +28,7 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
         <Editor
             height="100%"
             theme="vs-dark"
-            defaultLanguage={language}
+            language={language}
             defaultValue={value}
             value={value}
             onMount={(editor, monaco) => {

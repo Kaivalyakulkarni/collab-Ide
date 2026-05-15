@@ -35,6 +35,28 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
         setSelectedFile(file)
     }
 
+    const getLanguageFromFileName = (fileName: string) => {
+        const ext = fileName.split('.').pop();
+        switch (ext) {
+            case 'js':
+                return 'javascript';
+            case 'ts':
+                return 'typescript';
+            case 'css':
+                return 'css';
+            case 'html':
+                return 'html';
+            case 'py':
+                return 'python';
+            case 'jsx':
+                return 'javascript';
+            case 'tsx':
+                return 'typescript';                    
+            default:
+                return 'plaintext';
+        }
+    }
+
     const handleContentChange = (content: string) => {
         if (!selectedFileRef.current) return  // use ref instead of state
 
@@ -50,7 +72,7 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
                 .then(data => console.log("Saved:", data))
                 .catch(err => console.error("Error:", err))
             
-             sendInitRef.current?.(content, "javascript", selectedFileRef.current!.name)   
+             sendInitRef.current?.(content, getLanguageFromFileName(selectedFileRef.current!.name), selectedFileRef.current!.name)   
         }, 1000)
     }
 
@@ -95,7 +117,7 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
 
     useEffect(() => {
         if(selectedFile){
-            sendInitRef.current?.(selectedFile.content || "", "javascript",selectedFile.name)
+            sendInitRef.current?.(selectedFile.content || "", getLanguageFromFileName(selectedFile.name), selectedFile.name)
         }
     },[selectedFile])
 
@@ -123,7 +145,7 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
                 {/* Editor */}
                 <div style={{ flex: 1, overflow: "hidden" }}>
                     <EditorComponent
-                        language="javascript"
+                        language={getLanguageFromFileName(selectedFile?.name || "")}
                         value={selectedFile ? selectedFile.content || "" : "// Select a file to start coding"}
                         projectId={projectId}
                         fileId={selectedFile?.id}
@@ -155,7 +177,7 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
                             <TerminalComponent
                                 onReady={(fit) => { fitTerminal.current = fit }}
                                 content={selectedFile?.content || ""}
-                                language="javascript"
+                                language={getLanguageFromFileName(selectedFile?.name || "")} 
                                 onInitReady={(sendInit) => { sendInitRef.current = sendInit }}
                             />
                         </div>
