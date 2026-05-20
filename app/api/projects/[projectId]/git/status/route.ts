@@ -16,7 +16,7 @@ export async function GET(
 
         const status = await git.statusMatrix({ fs, dir });
 
-        const changed = status.filter(([filePath, head ,workdir,stage]) => workdir === 1);
+        const changed = status.filter(([filePath, head ,workdir,stage]) => workdir !== 0);
         
         return new Response(JSON.stringify({ changedFiles: changed.map(([filePath]) => filePath) }), { status: 200 });
 
