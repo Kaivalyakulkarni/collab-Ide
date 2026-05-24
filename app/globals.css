@@ -26,9 +26,55 @@ body {
 }
 
 .xterm-viewport {
-    overflow-y: hidden !important;
+  overflow-y: hidden !important;
 }
 
 .xterm {
-    padding: 0 !important;
+  padding: 0 !important;
 }
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border: 2px solid #050505;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #BDC3C7;
+}
+
+/* Body */
+
+body {
+  background-color: #050505;
+  color: #BDC3C7;
+  overflow-x: hidden;
+  background-image:
+    linear-gradient(rgba(189,195,199,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(189,195,199,0.03)1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+
+/* Marquee */
+
+/* @keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animation-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+} */

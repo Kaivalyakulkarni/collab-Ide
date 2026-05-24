@@ -1,0 +1,76 @@
+.indentGuide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(189, 195, 199, 0.1) 10%, rgba(189, 195, 199, 0.1) 90%, transparent);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.syntaxKeyword { color: #BDC3C7; }
+.syntaxString { color: #7F8C8D; }
+.syntaxComment { color: #4d4d4d; font-style: italic; }
+.syntaxFunc { color: #ECF0F1; }
+.syntaxAttr { color: #95A5A6; }
+.syntaxPrimary { color: #a6a7a7; }
+
+.navTab {
+  position: relative;
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-bottom: none;
+  margin-right: 2px;
+  transition: all 0.2s ease;
+}
+.navTabActive {
+  background: #111111;
+  border-top: 2px solid #BDC3C7;
+  color: #ECF0F1;
+}
+.navTabInactive { opacity: 0.5; }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.revealActive {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.codeGlass {
+  background: rgba(10, 10, 10, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(189, 195, 199, 0.2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.btnFunc {
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.2s ease;
+}
+.btnFunc:hover {
+  filter: brightness(1.4);
+  transform: translateY(-1px);
+}
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+  white-space: nowrap;
+  padding: 0 40px;
+  gap: 64px;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.socialIcon:hover{
+  background: rgba(189, 195, 199, 0.1);
+  border-color: rgba(189, 195, 199, 0.5);
+}
