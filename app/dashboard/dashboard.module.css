@@ -1,0 +1,84 @@
+.sideBar {
+    width: 240px; flex-shrink: 0;
+    border-right: 1px solid #1a1a1a;;
+    background: rgba(10,10,10,0.6);
+    display: flex; flex-direction: column;
+    padding: 24px 0;
+    position: sticky; top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+}
+
+.sidebarSection {
+    padding: 0 16px;
+    margin-bottom: 32px;
+}
+
+.sidebarLabel {
+    font-size: 10px; color:#7F8C8D;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding: 0 8px;
+}
+
+.sidebarItem {
+    cursor: pointer; transition: all 0.15s;
+    text-decoration: none;
+    margin-bottom: 2px;
+    font-size: 12px;
+    color:#7F8C8D;
+}
+
+.sidebarItem:hover,.sidebarItemActive {
+    background: #111111;
+    color: #ECF0F1;
+}
+
+.sidebarItemActive {
+    border-left: 2px solid #BDC3C7; padding-left: 8px;
+}
+
+.sidebarIcon {
+    width: 14px; height: 14px; opacity: 0.7;
+}
+
+.sidebarBadge {
+    margin-left: auto;
+    background: #252525;
+    color: #7F8C8D;
+    font-size: 10px; padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+
+  /* Bottom status bar */
+  .statusbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 24px;
+      z-index: 50;
+      background: #0a0a0a;
+      border-top: 1px solid #1a1a1a;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 20px;
+      font-size: 10px;
+      color: #7F8C8D;
+    }
+
+    .statusItem {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .statusActiveDot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
