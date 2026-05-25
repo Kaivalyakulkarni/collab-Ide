@@ -1,10 +1,14 @@
 .sideBar {
-    width: 240px; flex-shrink: 0;
-    border-right: 1px solid #1a1a1a;;
-    background: rgba(10,10,10,0.6);
-    display: flex; flex-direction: column;
+    width: 240px;
+    flex-shrink: 0;
+    border-right: 1px solid #1a1a1a;
+    ;
+    background: rgba(10, 10, 10, 0.6);
+    display: flex;
+    flex-direction: column;
     padding: 24px 0;
-    position: sticky; top: 56px;
+    position: sticky;
+    top: 56px;
     height: calc(100vh - 56px);
     overflow-y: auto;
 }
@@ -15,7 +19,8 @@
 }
 
 .sidebarLabel {
-    font-size: 10px; color:#7F8C8D;
+    font-size: 10px;
+    color: #7F8C8D;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     margin-bottom: 12px;
@@ -23,62 +28,556 @@
 }
 
 .sidebarItem {
-    cursor: pointer; transition: all 0.15s;
+    cursor: pointer;
+    transition: all 0.15s;
     text-decoration: none;
     margin-bottom: 2px;
     font-size: 12px;
-    color:#7F8C8D;
+    color: #7F8C8D;
 }
 
-.sidebarItem:hover,.sidebarItemActive {
+.sidebarItem:hover,
+.sidebarItemActive {
     background: #111111;
     color: #ECF0F1;
 }
 
 .sidebarItemActive {
-    border-left: 2px solid #BDC3C7; padding-left: 8px;
+    border-left: 2px solid #BDC3C7;
+    padding-left: 8px;
 }
 
 .sidebarIcon {
-    width: 14px; height: 14px; opacity: 0.7;
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
 }
 
 .sidebarBadge {
     margin-left: auto;
     background: #252525;
     color: #7F8C8D;
-    font-size: 10px; padding: 1px 6px;
+    font-size: 10px;
+    padding: 1px 6px;
     border-radius: 10px;
-  }
+}
 
 
-  /* Bottom status bar */
-  .statusbar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 24px;
-      z-index: 50;
-      background: #0a0a0a;
-      border-top: 1px solid #1a1a1a;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      gap: 20px;
-      font-size: 10px;
-      color: #7F8C8D;
-    }
 
-    .statusItem {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+.main {
+    flex: 1;
+    padding: 40px 48px;
+    overflow-y: auto;
+}
 
-    .statusActiveDot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #4ade80;
-    }
+.dashboardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 48px;
+}
+
+.greeting {
+    font-size: 11px;
+    color: #7F8C8D;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+}
+
+.greetingName {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ECF0F1;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 8px;
+}
+
+.greetingSub {
+    font-size: 12px;
+    color: rgba(127, 140, 141, 0.6);
+}
+
+.headerActions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btnOutline {
+
+    font-size: 12px;
+    background: none;
+    color: #7F8C8D;
+    border: 1px solid #252525;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnOutline:hover {
+    border-color: #BDC3C7;
+    color: #BDC3C7;
+}
+
+/* Search bar */
+.searchBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 6px;
+    padding: 8px 16px;
+    margin-bottom: 48px;
+    transition: border-color 0.2s;
+}
+
+.searchBar:focus-within {
+    border-color: #252525;
+}
+
+.searchBar input {
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: #ECF0F1;
+    flex: 1;
+}
+
+.searchBar input::placeholder {
+    color: rgba(127, 140, 141, 0.6);
+}
+
+.searchHint {
+    font-size: 10px;
+    color:rgba(127, 140, 141, 0.6);
+    background: #252525;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+
+/* Stats row */
+.statRow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 48px;
+}
+
+.statCard {
+    background: #0a0a0a;
+    padding: 24px;
+    transition: background 0.2s;
+}
+
+.statCard:hover {
+    background: #111111;
+}
+
+.statLabel {
+    font-size: 10px;
+    color: #7F8C8D;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.statDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #7F8C8D;
+}
+
+.statValue {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ECF0F1;
+    letter-spacing: -0.02em;
+}
+
+.statSub {
+    font-size: 11px;
+    color:  rgba(127, 140, 141, 0.6);
+    margin-top: 4px;
+    
+}
+
+/* Section header */
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.sectionTitle {
+    font-size: 11px;
+    color: #7F8C8D;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sectionTitle::before {
+    content: '//';
+    color: #252525;
+}
+
+.sectionLink {
+    font-size: 11px;
+    color: #7F8C8D;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.sectionLink:hover {
+    color: #BDC3C7;
+}
+
+/* Project Grid */
+.projectGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 48px;
+}
+
+.projectCard {
+    background: #0a0a0a;
+    padding: 28px;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.projectCard:hover {
+    background: #111111;
+}
+
+.projectCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background 0.2s;
+}
+
+.projectCard:hover::before {
+    background: #BDC3C7;
+}
+
+.projectCardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.projectIcon {
+    width: 36px;
+    height: 36px;
+    background: #252525;
+    border: 1px solid #1a1a1a;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #BDC3C7;
+    font-weight: 700;
+}
+
+.projectStatus {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: #7F8C8D;
+}
+
+.statusDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.statusActive {
+    background: #4ade80;
+    box-shadow: 0 0 6px #4ade80;
+}
+
+.statusIdle {
+    background: #7F8C8D;
+}
+
+.statusArchived {
+    background: #252525;
+}
+
+.projectName {
+    font-weight: 700;
+    font-size: 15px;
+    color: #ECF0F1;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+}
+
+.projectDesc {
+    font-size: 12px;
+    color: #7F8C8D;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.projectMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid #1a1a1a;
+}
+
+.projectLang {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #7F8C8D;
+}
+
+.langDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.langTs {
+    background: #3b82f6;
+}
+
+.langPy {
+    background: #f59e0b;
+}
+
+.langJs {
+    background: #eab308;
+}
+
+.langGo {
+    background: #06b6d4;
+}
+
+.projectTime {
+    font-size: 10px;
+    color: rgba(127, 140, 141, 0.6);
+}
+
+.projectCollaborators {
+    display: flex;
+}
+
+.collabAvatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #252525;
+    border: 2px solid #0a0a0a;
+    margin-left: -6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: #BDC3C7;
+}
+
+.collabAvatar:first-child {
+    margin-left: 0;
+}
+
+/* New project card */
+.projectCardNew {
+    background:#0a0a0a;
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 180px;
+    border: 1px dashed #252525;
+    border-radius: 0;
+}
+
+.projectCardNew:hover {
+    background: #111111;
+    border-color: #BDC3C7;
+}
+
+.newIcon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #252525;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #7F8C8D;
+    transition: all 0.2s;
+}
+
+.projectCardNew:hover .newIcon {
+    border-color: #BDC3C7;
+    color: #BDC3C7;
+}
+
+.newLabel {
+    font-size: 12px;
+    color: #7F8C8D;
+}
+
+/* Recent activity */
+.activityList {
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.activityItem {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0a0a0a;
+    transition: background 0.15s;
+    cursor: pointer;
+}
+
+.activityItem:last-child {
+    border-bottom: none;
+}
+
+.activityItem:hover {
+    background: #111111;
+}
+
+.activityIcon {
+    width: 32px;
+    height: 32px;
+    background: #252525;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: #7F8C8D;
+}
+
+.activityContent {
+    flex: 1;
+}
+
+.activityTitle {
+    font-size: 13px;
+    color: #ECF0F1;
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.activitySub {
+    font-size: 11px;
+    color: #7F8C8D;
+}
+
+.activityTime {
+    font-size: 10px;
+    color: rgba(127, 140, 141, 0.6);
+    flex-shrink: 0;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: #252525;
+    color: #7F8C8D;
+}
+
+.tagCommit {
+    background: rgba(74, 222, 128, 0.1);
+    color: #4ade80;
+}
+
+.tagCollab {
+    background: rgba(96, 165, 250, 0.1);
+    color: #60a5fa;
+}
+
+.tagCreate {
+    background: rgba(189, 195, 199, 0.1);
+    color: #BDC3C7;
+}
+
+
+
+
+/* Bottom status bar */
+.statusbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    z-index: 50;
+    background: #0a0a0a;
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 20px;
+    font-size: 10px;
+    color: #7F8C8D;
+}
+
+.statusItem {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.statusActiveDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #4ade80;
+}
+
+

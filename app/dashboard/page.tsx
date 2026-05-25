@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { redirect, useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { signOut, useSession } from "next-auth/react"
 import styles from "../landing.module.css"
 import style from "./dashboard.module.css"
-import { relative } from "path"
 
 
 export default function Dashboard() {
@@ -14,17 +13,66 @@ export default function Dashboard() {
     const { data: session, status } = useSession()
     const router = useRouter()
 
+    // ALL hooks must be here, before any returns
+    const [projects, setProjects] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    const [showModal, setShowModal] = useState(false)
+    const [newProjectName, setNewProjectName] = useState("")
+    const [newProjectDesc, setNewProjectDesc] = useState("")
+
+    const [isCreating, setIsCreating] = useState(false)
+
+    const handleCreateProject = async () => {
+        if (!newProjectName.trim()) return;
+
+        setIsCreating(true)
+
+        fetch("/api/projects", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: newProjectName,
+                description: newProjectDesc
+            })
+        })
+
+            .then(res => res.json())
+            .then(newProject => {
+                setProjects(prev => [...prev, newProject])
+                setShowModal(false)
+                setNewProjectName("")
+                setNewProjectDesc("")
+                setIsCreating(false)
+            })
+    }
+
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push("/");
         }
     }, [status])
 
+    useEffect(() => {
+        fetch("/api/projects")
+            .then(res => res.json())
+            .then(data => {
+                console.log("projects data:", data)
+                setProjects(data)
+                setLoading(false)
+            })
+            .catch(err => console.error("fetch error:", err))
+    }, [])
+
+    // early returns AFTER all hooks
     if (status === "loading") { return <div>Loading...</div> }
     if (!session) return null;
 
     const name = session.user?.name
     const initial = name?.charAt(0)
+
+
+
 
     return (
         <div>
@@ -99,7 +147,7 @@ export default function Dashboard() {
                             {`${session.user?.name}_dev`}
                         </a>
 
-                        <button className={styles.btnFunc} style={{ background: "#BDC3C7", color: "#000", padding: "5px 14px", borderRadius: "4px", fontSize: "12px", fontWeight: "600", border: "none", cursor: "pointer" }}>
+                        <button className={styles.btnFunc} style={{ background: "#BDC3C7", color: "#000", padding: "5px 14px", borderRadius: "4px", fontSize: "12px", fontWeight: "600", border: "none", cursor: "pointer" }} onClick={() => setShowModal(true)}>
                             + new_project()
                         </button>
                     </div>
@@ -112,7 +160,7 @@ export default function Dashboard() {
                 <aside className={`${style.sideBar}`}>
                     <div className="px-4 mb-8">
                         <div className="uppercase mb-3 px-2 text-[10px]" style={{ fontFamily: "var(--font-jetbrains-mono), monospace", letterSpacing: "0.15em", color: "#7F8C8D" }}> workspace</div>
-                        <a href="#" className={`${style.sidebarItem} ${style.sidebarItemActive} flex text-center items-center justify-center gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
+                        <a href="#" className={`${style.sidebarItem} ${style.sidebarItemActive} flex text-center items-center justify-start gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
                             <svg
                                 className={`${style.sidebarIcon}`}
                                 fill="none"
@@ -129,7 +177,7 @@ export default function Dashboard() {
                             overview
                             <span className={`${style.sidebarBadge}`}>3</span>
                         </a>
-                        <a href="#" className={`${style.sidebarItem}  flex text-center items-center justify-center gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
+                        <a href="#" className={`${style.sidebarItem}  flex text-center items-center justify-start gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
                             <svg
                                 className={`${style.sidebarIcon}`}
                                 fill="none"
@@ -146,7 +194,7 @@ export default function Dashboard() {
                             projects
                             <span className={`${style.sidebarBadge}`}>3</span>
                         </a>
-                        <a href="#" className={`${style.sidebarItem} flex text-center items-center justify-center gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
+                        <a href="#" className={`${style.sidebarItem} flex text-center items-center justify-start gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
                             <svg
                                 className={`${style.sidebarIcon}`}
                                 fill="none"
@@ -236,9 +284,11 @@ export default function Dashboard() {
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                                 />
                             </svg>
-                            setting
+                            settings
                         </a>
-                        <a href="#" className={`${style.sidebarItem} flex text-center items-center  gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
+                        <a href="#" className={`${style.sidebarItem} flex text-center items-center  gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }} onClick={() => {
+                            signOut({ callbackUrl: "/" })
+                        }}>
                             <svg
                                 className={`${style.sidebarIcon}`}
                                 fill="none"
@@ -257,9 +307,160 @@ export default function Dashboard() {
                     </div>
                 </aside>
                 {/* Main */}
-                <div>
-                    
-                </div>
+                <main className={`${style.main}`} style={{ paddingBottom: "48px" }}>
+                    {/* Header */}
+                    <div className={`${style.dashboardHeader}`}>
+                        <div>
+                            <div className={`${style.greeting}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>// dashboard.init()</div>
+
+                            <div className={`${style.greetingName}`}>hello, dev_user()</div>
+
+                            <div className={`${style.greetingSub}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>active_session: collab-ide · 3 projects · last_commit: 2h ago</div>
+                        </div>
+                        <div className={`${style.headerActions}`}>
+
+                            <button className={`${style.btnOutline}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>import_repo()</button>
+
+                            <button className={`${styles.btnFunc}`} style={{ background: "#BDC3C7", color: "#000", padding: "5px 14px", borderRadius: "4px", fontSize: "12px", fontWeight: "600", border: "none", cursor: "pointer" }} onClick={() => setShowModal(true)}>+ new_project()</button>
+                        </div>
+                    </div>
+                    {/* Search */}
+                    <div className={`${style.searchBar}`}>
+                        <svg
+                            width={14}
+                            height={14}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="#7F8C8D"
+                            strokeWidth={2}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="search_projects('query')"
+                            style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}
+                        />
+                        <span className={style.searchHint}>⌘K</span>
+                    </div>
+                    {/* stats */}
+                    <div className={`${style.statRow} `} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                        <div className={`${style.statCard} `}>
+                            <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#4ade80" }}></span>active_projects</div>
+                            <div className={`${style.statValue}`}>6</div>
+                            <div className={`${style.statSub}`}>+2 this month</div>
+                        </div>
+                        <div className={`${style.statCard} `}>
+                            <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#60a5fa" }}></span>collaborators</div>
+                            <div className={`${style.statValue}`}>12</div>
+                            <div className={`${style.statSub}`}>3 online now</div>
+                        </div>
+                        <div className={`${style.statCard} `}>
+                            <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#BDC3C7" }}></span>total_commits</div>
+                            <div className={`${style.statValue}`}>284</div>
+                            <div className={`${style.statSub}`}>last 30 days</div>
+                        </div>
+                        <div className={`${style.statCard} `}>
+                            <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#f59e0b" }}></span>ai_completions</div>
+                            <div className={`${style.statValue}`}>1.2k</div>
+                            <div className={`${style.statSub}`}>groq powered</div>
+                        </div>
+                    </div>
+
+                    {/* Projects */}
+                    <div className={`${style.sectionHeader}`} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                        <div className={`${style.sectionTitle}`}>recent_projects</div>
+                        <a href="#" className={`${style.sectionLink}`}>{"view_all() →"}</a>
+                    </div>
+
+                    {loading && <div style={{ color: "#7F8C8D", fontFamily: "var(--font-jetbrains-mono)", fontSize: "12px" }}>loading projects...</div>}
+
+                    <div className={`${style.projectGrid}`} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                        {/* projects */}
+                        {projects.map((project) => (
+                            <div key={project.id} className={`${style.projectCard}`}>
+                                <div className={`${style.projectCardHeader}`}>
+                                    <div className={`${style.projectIcon}`}>
+                                        {project.name.slice(0, 2).toUpperCase()}
+                                    </div>
+                                    <div className={`${style.projectStatus}`}>
+                                        <span className={`${style.statusDot} ${style.statusActive}`}></span>
+                                        active
+                                    </div>
+                                </div>
+                                <div className={`${style.projectName} font-mono`}>{project.name}</div>
+                                <div className={`${style.projectDesc}`}>{project.description || "// No description provided"}</div>
+                                <div className={`${style.projectMeta}`}>
+                                    <div className={`${style.projectLang}`}>
+                                        <span className={`${style.langDot} ${style.langTs}`}></span> Typescript
+                                    </div>
+                                    <div className={`${style.projectCollaborators}`}>
+                                        {project.members.slice(0, 3).map((m: any) => (
+                                            <div key={m.id} className={`${style.collabAvatar}`}>
+                                                {m.userId.slice(0, 1).toUpperCase()}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className={`${style.projectTime}`}>
+                                        {new Date(project.updatedAt).toLocaleDateString()}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+
+
+                        {/* New project */}
+                        <div className={`${style.projectCardNew}`} onClick={() => setShowModal(true)}>
+                            <div className={`${style.newIcon}`}>+</div>
+                            <div className={`${style.newLabel}`}>{"new_project()"}</div>
+                        </div>
+                    </div>
+
+                    {/* Recent Activities */}
+                    <div className={`${style.sectionHeader}`} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                        <div className={`${style.sectionTitle}`}>recent_activities</div>
+                        <a href="#" className={`${style.sectionLink}`}>{"view_log() →"}</a>
+                    </div>
+
+                    <div className={`${style.activityList}`} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                        <div className={`${style.activityItem}`}>
+                            <div className={`${style.activityIcon}`}>GIT</div>
+                            <div className={`${style.activityContent}`}>
+                                <div className={`${style.activityTitle}`}>feat: git integration with isomorphic-git</div>
+                                <div className={`${style.activitySub}`}>collab-ide · main · <span className={`${style.tag} ${style.tagCommit}`}>commit</span></div>
+                            </div>
+                            <div className={`${style.activityTime}`}>2hrs ago</div>
+                        </div>
+                        <div className={`${style.activityItem}`}>
+                            <div className={`${style.activityIcon}`}>USR</div>
+                            <div className={`${style.activityContent}`}>
+                                <div className={`${style.activityTitle}`}>Arjun joined collab-ide</div>
+                                <div className={`${style.activitySub}`}>collab-ide · editor role · <span className={`${style.tag} ${style.tagCollab}`}>collab</span></div>
+                            </div>
+                            <div className={`${style.activityTime}`}>5hrs ago</div>
+                        </div>
+                        <div className={`${style.activityItem}`}>
+                            <div className={`${style.activityIcon}`}>NEW</div>
+                            <div className={`${style.activityContent}`}>
+                                <div className={`${style.activityTitle}`}>Created flask-contrib</div>
+                                <div className={`${style.activitySub}`}>new project · Python · Flask · <span className={`${style.tag} ${style.tagCreate}`}>create</span></div>
+                            </div>
+                            <div className={`${style.activityTime}`}>1d ago</div>
+                        </div>
+                        <div className={`${style.activityItem}`}>
+                            <div className={`${style.activityIcon}`}>GIT</div>
+                            <div className={`${style.activityContent}`}>
+                                <div className={`${style.activityTitle}`}>feat: dynamic language detection from file extension</div>
+                                <div className={`${style.activitySub}`}>collab-ide · main · <span className={`${style.tag} ${style.tagCommit}`}>commit</span></div>
+                            </div>
+                            <div className={`${style.activityTime}`}>2d ago</div>
+                        </div>
+                    </div>
+                </main>
             </div>
             {/* Status-Bar */}
             <div className={`${style.statusbar}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
@@ -268,6 +469,89 @@ export default function Dashboard() {
                 <div className={`${style.statusItem}`}>TypeScript</div>
                 <div className={`${style.statusItem} ml-auto`}>COLLAB_IDE_DASHBOARD_V1.0</div>
             </div>
+
+            {/* Modal */}
+            {showModal && (
+                // layer1-overlay
+                <div style={{
+                    position: "fixed", inset: 0,
+                    background: "rgba(0,0,0,0.7)",
+                    zIndex: 100,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }} onClick={() => setShowModal(false)}>
+                    {/* layer2-overlay */}
+                    <div style={{
+                        background: "#0a0a0a",
+                        border: "1px solid #1a1a1a",
+                        borderRadius: "8px",
+                        padding: "32px",
+                        width: "480px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "16px"
+                    }} onClick={e => e.stopPropagation()}>
+                        <div style={{ fontFamily: "var(--font-jetbrains-mono)", fontSize: "11px", color: "#7F8C8D", letterSpacing: "0.15em" }}>
+                            {"// new_project()"}
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="project_name"
+                            value={newProjectName}
+                            onChange={e => setNewProjectName(e.target.value)}
+                            style={{
+                                background: "#111111",
+                                border: "1px solid #1a1a1a",
+                                borderRadius: "4px",
+                                padding: "10px 14px",
+                                color: "#ECF0F1",
+                                fontFamily: "var(--font-jetbrains-mono), monospace",
+                                fontSize: "13px",
+                                width: "100%",
+                                outline: "none"
+                            }}
+                        ></input>
+                        <input
+                            type="text"
+                            placeholder="project_description (optional)"
+                            value={newProjectDesc}
+                            onChange={e => setNewProjectDesc(e.target.value)}
+                            style={{
+                                background: "#111111",
+                                border: "1px solid #1a1a1a",
+                                borderRadius: "4px",
+                                padding: "10px 14px",
+                                color: "#ECF0F1",
+                                fontFamily: "var(--font-jetbrains-mono), monospace",
+                                fontSize: "13px",
+                                width: "100%",
+                                outline: "none"
+                            }}></input>
+                        <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+                            <button style={{ background: "#BDC3C7", color: "#000", padding: "5px 14px", borderRadius: "4px", fontSize: "12px", fontWeight: "600", border: "none", cursor: "pointer" }} onClick={() => setShowModal(false)}>cancel</button>
+                            <button
+                                onClick={handleCreateProject}
+                                disabled={isCreating}
+                                style={{
+                                    background: isCreating ? "#7F8C8D" : "#BDC3C7",
+                                    color: "#000",
+                                    opacity: isCreating ? 0.6 : 1,
+                                    cursor: isCreating ? "not-allowed" : "pointer",
+                                    padding: "5px 14px",
+                                    borderRadius: "4px",
+                                    fontSize: "12px",
+                                    fontWeight: "600",
+                                    border: "none"
+                                }}
+                            >
+                                {isCreating ? "creating..." : "create_project"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
