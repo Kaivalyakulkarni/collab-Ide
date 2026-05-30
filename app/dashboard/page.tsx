@@ -98,11 +98,11 @@ export default function Dashboard() {
             {/* NavBar */}
             <nav style={{ position: "fixed", top: 0, width: "100%", zIndex: 50, backdropFilter: "blur(12px)", borderBottom: "1px solid #1a1a1a", background: "rgba(5,5,5,0.6)", height: "56px", display: "flex", alignItems: "center" }}>
                 <div style={{ display: "flex", alignItems: "center", padding: "0 25px", height: "100%", width: "100%", maxWidth: "1440px", margin: "0 auto" }}>
-
+                
                     {/* Logo + tabs */}
                     <div style={{ display: "flex", alignItems: "center", gap: "24px", height: "100%" }}>
-
-                        <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: ".9rem", fontWeight: "bold", color: "#BDC3C7" }}>
+                        {/* Logo */}
+                        <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: ".9rem", fontWeight: "bold", color: "#BDC3C7" ,cursor: "pointer"}} onClick={() => router.push("/dashboard")}>
                             {/* Logo */}
                             <svg
                                 fill="#ffffff"
@@ -136,6 +136,8 @@ export default function Dashboard() {
                             </svg>
                             collab_ide
                         </span>
+
+                        {/* tabs */}
                         <div style={{ display: "flex", height: "100%", alignItems: "flex-end" }} className="hiddden md:flex">
                             <a href="#" onClick={() => setActivePanel("overview")} className={`${styles.navTab} ${activePannel === "overview" ? styles.navTabActive : styles.navTabInActive}`} style={{ padding: "0 20px", height: "40px", display: "flex", alignItems: "center", fontSize: "12px", fontFamily: "var(--font-jetbrains-mono),monospace", gap: "8px" }}>
                                 <div className="w-1.5 h-1.5 rounded-full bg-green-400"></div>
@@ -380,7 +382,7 @@ export default function Dashboard() {
                                     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
                                     .slice(0, 3)
                                     .map((project) => (
-                                        <div key={project.id} className={`${style.projectCard}`}>
+                                        <div key={project.id} className={`${style.projectCard}`} onClick={() => router.push(`/projects/${project.id}`)}>
                                             <div className={`${style.projectCardHeader}`}>
                                                 <div className={`${style.projectIcon}`}>
                                                     {project.name.slice(0, 2).toUpperCase()}
@@ -514,7 +516,7 @@ export default function Dashboard() {
                                 {/* projects */}
                                 {filteredProjects
                                     .map((project) => (
-                                        <div key={project.id} className={`${style.projectCard}`}>
+                                        <div key={project.id} className={`${style.projectCard}`} onClick={() => router.push(`/projects/${project.id}`)}>
                                             <div className={`${style.projectCardHeader}`}>
                                                 <div className={`${style.projectIcon}`}>
                                                     {project.name.slice(0, 2).toUpperCase()}
@@ -813,6 +815,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+            
         </div>
     )
 }

@@ -1,0 +1,375 @@
+.btnOutline {
+    font-size: 10px;
+    background: none;
+    color: #7F8C8D;
+    border: 1px solid #252525;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnOutline:hover {
+    border-color: #BDC3C7;
+    color: #BDC3C7;
+}
+
+.sideBar {
+    width: 240px;
+    flex-shrink: 0;
+    border-right: 1px solid #1a1a1a;
+    ;
+    background: rgba(10, 10, 10, 0.6);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+}
+
+.sidebarSection {
+    padding: 0 16px;
+    margin-bottom: 32px;
+}
+
+.sidebarLabel {
+    font-size: 10px;
+    color: #7F8C8D;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding: 0 8px;
+}
+
+.sidebarItem {
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    margin-bottom: 2px;
+    font-size: 12px;
+    color: #7F8C8D;
+}
+
+.sidebarItem:hover,
+.sidebarItemActive {
+    background: #111111;
+    color: #ECF0F1;
+}
+
+.sidebarItemActive {
+    border-left: 2px solid #BDC3C7;
+    padding-left: 8px;
+}
+
+.sidebarIcon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+.sidebarBadge {
+    margin-left: auto;
+    background: #252525;
+    color: #7F8C8D;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+.collabTag {
+    display: inline-block;
+    text-align: center;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: #333;
+    color: #7F8C8D;
+}
+
+.collabTagOwner {
+    background: #0f2e0fe1;
+    color: #46be6a;
+}
+
+
+
+.main {
+    flex: 1;
+    padding: 40px 48px;
+    overflow-y: auto;
+}
+
+
+/* Section header */
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.sectionTitle {
+    font-size: 11px;
+    color: #7F8C8D;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sectionTitle::before {
+    content: '//';
+    color: #252525;
+}
+
+.sectionLink {
+    font-size: 11px;
+    color: #7F8C8D;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.sectionLink:hover {
+    color: #BDC3C7;
+}
+
+/* stats */
+
+.statRow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 48px;
+}
+
+.statCard {
+    background: #0a0a0a;
+    font-family: monospace;
+    padding: 24px;
+    transition: background 0.2s;
+}
+
+.statCard:hover {
+    background: #111111;
+}
+
+.statLabel {
+    font-size: 8px;
+    color: #7F8C8D;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.statDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #7F8C8D;
+}
+
+.statValue {
+    font-size: 24px;
+    font-family: monospace;
+    font-weight: 700;
+    /* color: #ECF0F1; */
+    letter-spacing: -0.02em;
+}
+
+.statSub {
+    font-size: 11px;
+    color: rgba(127, 140, 141, 0.6);
+    margin-top: 1px;
+
+}
+
+
+.panel {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.panelTitle {
+    font-size: 10px;
+    color: #7F8C8D;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.panelTitle::before {
+    content: '//';
+    color: #252525;
+}
+
+.panelAction {
+    font-size: 10px;
+    color: #7F8C8D;
+    background: transparent;
+    border: 1px solid #252525;
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: monospace;
+    transition: all 0.2s;
+}
+
+.panelAction:hover {
+    border-color: #BDC3C7;
+    color: #BDC3C7;
+}
+
+.fileRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(26, 26, 26, 0.5);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.fileRow:last-child {
+    border-bottom: none;
+}
+
+.fileRow:hover {
+    background: #111;
+}
+
+.fileName {
+    flex: 1;
+    font-size: 11px;
+    color: #BDC3C7;
+}
+
+.fileMsg {
+    font-size: 10px;
+    color: #7F8C8D;
+    flex: 1;
+}
+
+.fileTime {
+    font-size: 10px;
+    color: rgba(127, 140, 141, 0.5);
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.fullWidth {
+    grid-column: 1 / -1;
+}
+
+
+.projectHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+}
+
+.projectTitleArea {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.projectIconLg {
+    width: 44px;
+    height: 44px;
+    background: #1a1a1a;
+    border: 1px solid #252525;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #BDC3C7;
+}
+
+.projectTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ECF0F1;
+    letter-spacing: -0.02em;
+}
+
+.projectComment {
+    font-size: 11px;
+    color: #7F8C8D;
+    margin-bottom: 4px;
+}
+
+.projectDesc {
+    font-size: 12px;
+    color: rgba(127, 140, 141, 0.7);
+}
+
+.headerActions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+
+/* Bottom status bar */
+.statusbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    z-index: 50;
+    background: #0a0a0a;
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 20px;
+    font-size: 10px;
+    color: #7F8C8D;
+}
+
+.statusItem {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.statusActiveDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #4ade80;
+}
