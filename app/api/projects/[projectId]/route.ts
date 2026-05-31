@@ -26,3 +26,44 @@ export const GET = auth(async (req, context: any) => {
 
     return NextResponse.json(project)
 })
+
+export const PATCH = auth(async (req: any, context: any) => {
+    const { projectId } = await context.params
+    const session = req.auth
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const body = await req.json()
+    const { status } = body
+
+    // verify requester is OWNER
+    const membership = await prisma.projectMember.findFirst({
+        where: { projectId, userId: session.user.id, role: "OWNER" }
+    })
+    if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+
+    const updated = await prisma.project.update({
+        where: { id: projectId },
+        data: { status }
+    })
+    return NextResponse.json(updated)
+}) as any
+
+export const DELETE = auth(async (req: any, context: any) => {
+    const { projectId } = await context.params
+    const session = req.auth
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const membership = await prisma.projectMember.findFirst({
+        where: { projectId, userId: session.user.id, role: "OWNER" }
+    })
+    if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+
+    await prisma.$transaction([
+        prisma.inviteToken.deleteMany({ where: { projectId } }),
+        prisma.file.deleteMany({ where: { projectId } }),
+        prisma.projectMember.deleteMany({ where: { projectId } }),
+        prisma.project.delete({ where: { id: projectId } })
+    ])
+
+    return NextResponse.json({ success: true })
+}) as any

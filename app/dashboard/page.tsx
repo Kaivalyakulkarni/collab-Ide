@@ -14,7 +14,7 @@ export default function Dashboard() {
     const router = useRouter()
 
     // ALL hooks must be here, before any returns
-    const [activePannel, setActivePanel] = useState<"overview" | "projects" | "collaborators" | "settings">("overview") // overview, projects, collaborators, settings
+    const [activePannel, setActivePanel] = useState<"overview" | "projects" | "settings">("overview") // overview, projects, collaborators, settings
     const [projects, setProjects] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -84,7 +84,33 @@ export default function Dashboard() {
     const name = session.user?.name
     const initial = name?.charAt(0)
 
+    const totalProjects = projects.length
+    const activeProjects = projects.filter(p => p.status === "active").length
 
+    const allMemberIds = new Set(
+        projects.flatMap(p => p.members.map((m: any) => m.userId))
+    )
+    const totalCollaborators = allMemberIds.size
+
+    const recentProjects = [...projects]
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 3)
+
+    const activityEvents = projects
+        .flatMap(p => [
+            { type: "CREATE", label: `Created ${p.name}`, sub: `new project`, time: new Date(p.createdAt), project: p.name },
+            { type: "UPDATE", label: `Updated ${p.name}`, sub: `files or settings changed`, time: new Date(p.updatedAt), project: p.name }
+        ])
+        .filter((e, i, arr) => {
+            // drop UPDATE if it's the same time as CREATE (just created, never edited)
+            if (e.type === "UPDATE") {
+                const create = arr.find(x => x.type === "CREATE" && x.project === e.project)
+                if (create && Math.abs(e.time.getTime() - create.time.getTime()) < 1000) return false
+            }
+            return true
+        })
+        .sort((a, b) => b.time.getTime() - a.time.getTime())
+        .slice(0, 5)
 
 
     return (
@@ -98,11 +124,11 @@ export default function Dashboard() {
             {/* NavBar */}
             <nav style={{ position: "fixed", top: 0, width: "100%", zIndex: 50, backdropFilter: "blur(12px)", borderBottom: "1px solid #1a1a1a", background: "rgba(5,5,5,0.6)", height: "56px", display: "flex", alignItems: "center" }}>
                 <div style={{ display: "flex", alignItems: "center", padding: "0 25px", height: "100%", width: "100%", maxWidth: "1440px", margin: "0 auto" }}>
-                
+
                     {/* Logo + tabs */}
                     <div style={{ display: "flex", alignItems: "center", gap: "24px", height: "100%" }}>
                         {/* Logo */}
-                        <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: ".9rem", fontWeight: "bold", color: "#BDC3C7" ,cursor: "pointer"}} onClick={() => router.push("/dashboard")}>
+                        <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: ".9rem", fontWeight: "bold", color: "#BDC3C7", cursor: "pointer" }} onClick={() => router.push("/dashboard")}>
                             {/* Logo */}
                             <svg
                                 fill="#ffffff"
@@ -190,7 +216,6 @@ export default function Dashboard() {
                                 />
                             </svg>
                             overview
-                            <span className={`${style.sidebarBadge}`}>3</span>
                         </a>
                         <a href="#" onClick={() => setActivePanel("projects")} className={`${style.sidebarItem} ${activePannel === "projects" ? style.sidebarItemActive : ""}  flex text-center items-center justify-start gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
                             <svg
@@ -207,76 +232,26 @@ export default function Dashboard() {
                                 />
                             </svg>
                             projects
-                            <span className={`${style.sidebarBadge}`}>3</span>
+                            <span className={`${style.sidebarBadge}`}>{totalProjects}</span>
                         </a>
-                        <a href="#" onClick={() => setActivePanel("collaborators")} className={`${style.sidebarItem} ${activePannel === "collaborators" ? style.sidebarItemActive : ""} flex text-center items-center justify-start gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
-                            <svg
-                                className={`${style.sidebarIcon}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                            </svg>
-                            collaborators
-                            {/* <span className={`${style.sidebarBadge}`}>0</span> */}
-                        </a>
+                        
                     </div>
                     <div className={`${style.sidebarSection}`}>
                         <div className={`${style.sidebarLabel}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>recent</div>
-                        <a href="#" className={`${style.sidebarItem}  flex text-center items-center  gap-3 px-3 py-2 rounded `} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
-                            <svg
-                                className={`${style.sidebarIcon}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
+                        {recentProjects.map(p => (
+                            <a
+                                key={p.id}
+                                href="#"
+                                onClick={() => router.push(`/projects/${p.id}`)}
+                                className={`${style.sidebarItem} flex text-center items-center gap-3 px-3 py-2 rounded`}
+                                style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                                />
-                            </svg>
-                            collab-ide
-                        </a>
-                        <a href="#" className={`${style.sidebarItem}  flex text-center items-center  gap-3 px-3 py-2 rounded`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
-                            <svg
-                                className={`${style.sidebarIcon}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                                />
-                            </svg>
-                            flask-contrib
-                        </a>
-                        <a href="#" className={`${style.sidebarItem}  flex text-center items-center  gap-3 px-3 py-2 rounded`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
-                            <svg
-                                className={`${style.sidebarIcon}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                                />
-                            </svg>
-                            portfolio-v3
-                        </a>
+                                <svg className={`${style.sidebarIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                                {p.name}
+                            </a>
+                        ))}
                     </div>
                     <div className={`${style.sidebarSection}`}>
                         <div className={`${style.sidebarLabel}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>system</div>
@@ -334,7 +309,9 @@ export default function Dashboard() {
 
                                     <div className={`${style.greetingName}`}>hello, {`${session.user?.name}_dev()`}</div>
 
-                                    <div className={`${style.greetingSub}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>active_session: collab-ide · 3 projects · last_commit: 2h ago</div>
+                                    <div className={`${style.greetingSub}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
+                                        active_session: collab-ide · {totalProjects} projects · last_updated: {recentProjects[0] ? new Date(recentProjects[0].updatedAt).toLocaleDateString() : "—"}
+                                    </div>
                                 </div>
                                 <div className={`${style.headerActions}`}>
 
@@ -345,25 +322,25 @@ export default function Dashboard() {
                             </div>
 
                             {/* stats */}
-                            <div className={`${style.statRow} `} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
-                                <div className={`${style.statCard} `}>
+                            <div className={`${style.statRow}`} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
+                                <div className={`${style.statCard}`}>
                                     <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#4ade80" }}></span>active_projects</div>
-                                    <div className={`${style.statValue}`}>6</div>
-                                    <div className={`${style.statSub}`}>+2 this month</div>
+                                    <div className={`${style.statValue}`}>{activeProjects}</div>
+                                    <div className={`${style.statSub}`}>{totalProjects} total</div>
                                 </div>
-                                <div className={`${style.statCard} `}>
+                                <div className={`${style.statCard}`}>
                                     <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#60a5fa" }}></span>collaborators</div>
-                                    <div className={`${style.statValue}`}>12</div>
-                                    <div className={`${style.statSub}`}>3 online now</div>
+                                    <div className={`${style.statValue}`}>{totalCollaborators}</div>
+                                    <div className={`${style.statSub}`}>across all projects</div>
                                 </div>
-                                <div className={`${style.statCard} `}>
-                                    <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#BDC3C7" }}></span>total_commits</div>
-                                    <div className={`${style.statValue}`}>284</div>
-                                    <div className={`${style.statSub}`}>last 30 days</div>
+                                <div className={`${style.statCard}`}>
+                                    <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#BDC3C7" }}></span>total_files</div>
+                                    <div className={`${style.statValue}`}>{projects.reduce((acc, p) => acc + (p.files?.length || 0), 0)}</div>
+                                    <div className={`${style.statSub}`}>across all projects</div>
                                 </div>
-                                <div className={`${style.statCard} `}>
+                                <div className={`${style.statCard}`}>
                                     <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#f59e0b" }}></span>ai_completions</div>
-                                    <div className={`${style.statValue}`}>1.2k</div>
+                                    <div className={`${style.statValue}`}>—</div>
                                     <div className={`${style.statSub}`}>groq powered</div>
                                 </div>
                             </div>
@@ -420,38 +397,21 @@ export default function Dashboard() {
                             </div>
 
                             <div className={`${style.activityList}`} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
-                                <div className={`${style.activityItem}`}>
-                                    <div className={`${style.activityIcon}`}>GIT</div>
-                                    <div className={`${style.activityContent}`}>
-                                        <div className={`${style.activityTitle}`}>feat: git integration with isomorphic-git</div>
-                                        <div className={`${style.activitySub}`}>collab-ide · main · <span className={`${style.tag} ${style.tagCommit}`}>commit</span></div>
+                                {activityEvents.length === 0 && (
+                                    <div style={{ padding: "16px 20px", fontSize: "11px", color: "#7F8C8D" }}>// no activity yet</div>
+                                )}
+                                {activityEvents.map((event, i) => (
+                                    <div key={i} className={`${style.activityItem}`}>
+                                        <div className={`${style.activityIcon}`}>{event.type === "CREATE" ? "NEW" : "UPD"}</div>
+                                        <div className={`${style.activityContent}`}>
+                                            <div className={`${style.activityTitle}`}>{event.label}</div>
+                                            <div className={`${style.activitySub}`}>
+                                                {event.sub} · <span className={`${style.tag} ${event.type === "CREATE" ? style.tagCreate : style.tagCommit}`}>{event.type.toLowerCase()}</span>
+                                            </div>
+                                        </div>
+                                        <div className={`${style.activityTime}`}>{event.time.toLocaleDateString()}</div>
                                     </div>
-                                    <div className={`${style.activityTime}`}>2hrs ago</div>
-                                </div>
-                                <div className={`${style.activityItem}`}>
-                                    <div className={`${style.activityIcon}`}>USR</div>
-                                    <div className={`${style.activityContent}`}>
-                                        <div className={`${style.activityTitle}`}>Arjun joined collab-ide</div>
-                                        <div className={`${style.activitySub}`}>collab-ide · editor role · <span className={`${style.tag} ${style.tagCollab}`}>collab</span></div>
-                                    </div>
-                                    <div className={`${style.activityTime}`}>5hrs ago</div>
-                                </div>
-                                <div className={`${style.activityItem}`}>
-                                    <div className={`${style.activityIcon}`}>NEW</div>
-                                    <div className={`${style.activityContent}`}>
-                                        <div className={`${style.activityTitle}`}>Created flask-contrib</div>
-                                        <div className={`${style.activitySub}`}>new project · Python · Flask · <span className={`${style.tag} ${style.tagCreate}`}>create</span></div>
-                                    </div>
-                                    <div className={`${style.activityTime}`}>1d ago</div>
-                                </div>
-                                <div className={`${style.activityItem}`}>
-                                    <div className={`${style.activityIcon}`}>GIT</div>
-                                    <div className={`${style.activityContent}`}>
-                                        <div className={`${style.activityTitle}`}>feat: dynamic language detection from file extension</div>
-                                        <div className={`${style.activitySub}`}>collab-ide · main · <span className={`${style.tag} ${style.tagCommit}`}>commit</span></div>
-                                    </div>
-                                    <div className={`${style.activityTime}`}>2d ago</div>
-                                </div>
+                                ))}
                             </div>
                         </>
                     )}
@@ -657,68 +617,7 @@ export default function Dashboard() {
 
                         </>
                     )}
-                    {/* collaborators */}
-                    {activePannel === "collaborators" && (
-                        <>
-                            {/* Page title */}
-                            <div className={`${style.sectionHeader}`} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
-                                <div className={`${style.sectionTitle}`}>collaborators</div>
-                            </div>
-
-                            <div className={`${style.statCollabRow} `} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
-                                <div className={`${style.statCollabCard} `}>
-                                    <div className={`${style.statCollabLabel}`}><span className={`${style.statDot}`} style={{ background: "#60a5fa" }}></span>total</div>
-                                    <div className={`${style.statCollabValue}`}>3</div>
-                                </div>
-                                <div className={`${style.statCollabCard} `}>
-                                    <div className={`${style.statCollabLabel}`}><span className={`${style.statDot}`} style={{ background: "#4ade80" }}></span>online</div>
-                                    <div className={`${style.statCollabValue} `}>2</div>
-                                </div>
-                                <div className={`${style.statCollabCard} `}>
-                                    <div className={`${style.statCollabLabel}`}><span className={`${style.statDot}`} style={{ background: "#BDC3C7" }}></span>projects</div>
-                                    <div className={`${style.statCollabValue}`}>4</div>
-                                </div>
-                            </div>
-
-                            {/* collabList */}
-                            <div className={`${style.collabList}`} style={{ fontFamily: "var(--font-jetbrains-mono), monospace" }}>
-                                {/* collaborator 1 */}
-                                <div className={`${style.collabItem}`}>
-                                    <div className={`${style.collabInfo}`}>
-                                        <div className={`${style.collabAvatarLarge}`}>S</div>
-                                        <div className={`${style.collabDetails}`}>
-                                            <div className={`${style.collabName}`}>sanket_dev</div>
-                                            <div className={`${style.collabProjects}`}>collab-ide . flask-contributro </div>
-                                        </div>
-                                    </div>
-                                    <div className={`${style.collabStatus}`}>
-                                        <span className={`${style.collabDot} ${style.collabDotOwner}`}></span>
-                                        <div className={`${style.collabTag} ${style.collabTagOwner}`}>Owner</div>
-                                    </div>
-                                </div>
-                                {/* collaborator 2 */}
-                                <div className={`${style.collabItem}`}>
-                                    <div className={`${style.collabInfo}`}>
-                                        <div className={`${style.collabAvatarLarge}`}>J</div>
-                                        <div className={`${style.collabDetails}`}>
-                                            <div className={`${style.collabName}`}>john_doe</div>
-                                            <div className={`${style.collabProjects}`}>collab-ide . django-contributor </div>
-                                        </div>
-                                    </div>
-                                    <div className={`${style.collabStatus}`}>
-                                        <span className={`${style.collabDot} ${style.collabDotEditor}`}></span>
-                                        <div className={`${style.collabTag} ${style.collabTagEditor}`}>Editor</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={`${style.inviteCollab}`} style={{
-
-                            }}>
-                                + invite_collaborator()
-                            </div>
-                        </>
-                    )}
+                    
 
 
 
@@ -815,7 +714,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
-            
+
         </div>
     )
 }

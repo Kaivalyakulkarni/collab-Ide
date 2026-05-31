@@ -25,6 +25,13 @@ export default function ProjectDetailsPage() {
     const [isGenerating, setIsGenerating] = useState(false)
     const [copied, setCopied] = useState(false)
 
+    const [projectStatus, setProjectStatus] = useState<string>("")
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [deleteConfirm, setDeleteConfirm] = useState("")
+    const [statusSaving, setStatusSaving] = useState(false)
+
+
+
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push("/")
@@ -39,6 +46,7 @@ export default function ProjectDetailsPage() {
                 if (res.ok) {
                     const data = await res.json()
                     setProject(data)
+                    setProjectStatus(data.status)
                 } else {
                     console.error("Failed to fetch project")
                 }
@@ -106,6 +114,26 @@ export default function ProjectDetailsPage() {
         })
         refreshProject()
     }
+
+    const handleStatusChange = async () => {
+        setStatusSaving(true)
+        await fetch(`/api/projects/${projectId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: projectStatus })
+        })
+        refreshProject()
+        setStatusSaving(false)
+    }
+
+    const handleDeleteProject = async () => {
+        if (deleteConfirm !== project.name) return
+        setIsDeleting(true)
+        await fetch(`/api/projects/${projectId}`, { method: "DELETE" })
+        router.push("/dashboard")
+    }
+
+    const totalmembers = project?.members?.length || 0
 
     return (
         <div>
@@ -235,7 +263,7 @@ export default function ProjectDetailsPage() {
                                         />
                                     </svg>
                                     collaborators
-                                    <span className={`${style.sidebarBadge}`}>6</span>
+                                    <span className={`${style.sidebarBadge}`}>{totalmembers}</span>
                                 </a>
                             </div>
                             <div className="flex-1 ">
@@ -651,6 +679,103 @@ export default function ProjectDetailsPage() {
                                         </div>
                                     ))}
                                 </div>
+                            </>
+                        )}
+
+                        {activePannel === "settings" && (
+                            <>
+                                <div className={style.sectionHeader} style={{ fontFamily: "var(--font-jetbrains-mono)" }}>
+                                    <div className={style.sectionTitle}>settings</div>
+                                    <span style={{ fontSize: "10px", color: "#7F8C8D", fontFamily: "var(--font-jetbrains-mono)" }}>// owner only</span>
+                                </div>
+
+                                {myRole !== "OWNER" ? (
+                                    <div className={style.panel} style={{ padding: "24px 20px", fontFamily: "var(--font-jetbrains-mono)", fontSize: "11px", color: "#7F8C8D" }}>
+                // access_denied() — only project owners can modify settings
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Change Status */}
+                                        <div className={style.panel} style={{ marginBottom: "16px" }}>
+                                            <div className={style.panelHeader}>
+                                                <div className={style.panelTitle}>project_status</div>
+                                            </div>
+                                            <div style={{ padding: "16px 20px", fontFamily: "var(--font-jetbrains-mono)" }}>
+                                                <div style={{ fontSize: "10px", color: "#7F8C8D", marginBottom: "12px" }}>// set_status()</div>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                                    <select
+                                                        value={projectStatus}
+                                                        onChange={e => setProjectStatus(e.target.value)}
+                                                        style={{
+                                                            background: "#111", border: "1px solid #252525",
+                                                            borderRadius: "3px", color: "#ECF0F1", fontSize: "11px",
+                                                            padding: "6px 10px", fontFamily: "var(--font-jetbrains-mono)",
+                                                            cursor: "pointer", outline: "none"
+                                                        }}
+                                                    >
+                                                        <option value="active">active</option>
+                                                        <option value="archived">archived</option>
+                                                        <option value="completed">completed</option>
+                                                    </select>
+                                                    <button
+                                                        onClick={handleStatusChange}
+                                                        disabled={statusSaving}
+                                                        style={{
+                                                            background: "#BDC3C7", color: "#000", border: "none",
+                                                            padding: "6px 16px", borderRadius: "3px", fontSize: "11px",
+                                                            fontWeight: "700", cursor: "pointer", fontFamily: "var(--font-jetbrains-mono)"
+                                                        }}
+                                                    >
+                                                        {statusSaving ? "saving..." : "save_status()"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Danger Zone */}
+                                        <div className={style.panel} style={{ border: "1px solid rgba(248,113,113,0.2)" }}>
+                                            <div className={style.panelHeader} style={{ borderBottom: "1px solid rgba(248,113,113,0.15)" }}>
+                                                <div className={style.panelTitle} style={{ color: "#f87171" }}>danger_zone</div>
+                                            </div>
+                                            <div style={{ padding: "16px 20px", fontFamily: "var(--font-jetbrains-mono)" }}>
+                                                <div style={{ fontSize: "10px", color: "#7F8C8D", marginBottom: "12px" }}>
+                            // delete_project() — this action is irreversible. type project name to confirm.
+                                                </div>
+                                                <div style={{ fontSize: "11px", color: "#ECF0F1", marginBottom: "10px" }}>
+                                                    Project name: <span style={{ color: "#f87171" }}>{project?.name}</span>
+                                                </div>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="type project name to confirm"
+                                                        value={deleteConfirm}
+                                                        onChange={e => setDeleteConfirm(e.target.value)}
+                                                        style={{
+                                                            background: "#111", border: "1px solid rgba(248,113,113,0.3)",
+                                                            borderRadius: "3px", color: "#ECF0F1", fontSize: "11px",
+                                                            padding: "6px 12px", fontFamily: "var(--font-jetbrains-mono)",
+                                                            outline: "none", width: "240px"
+                                                        }}
+                                                    />
+                                                    <button
+                                                        onClick={handleDeleteProject}
+                                                        disabled={deleteConfirm !== project?.name || isDeleting}
+                                                        style={{
+                                                            background: deleteConfirm === project?.name ? "rgba(248,113,113,0.15)" : "transparent",
+                                                            color: deleteConfirm === project?.name ? "#f87171" : "#7F8C8D",
+                                                            border: `1px solid ${deleteConfirm === project?.name ? "rgba(248,113,113,0.4)" : "#252525"}`,
+                                                            padding: "6px 16px", borderRadius: "3px", fontSize: "11px",
+                                                            cursor: deleteConfirm === project?.name ? "pointer" : "not-allowed",
+                                                            fontFamily: "var(--font-jetbrains-mono)", transition: "all 0.2s"
+                                                        }}
+                                                    >
+                                                        {isDeleting ? "deleting..." : "delete_project()"}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </>
                         )}
                     </main>
