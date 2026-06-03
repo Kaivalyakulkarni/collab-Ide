@@ -7,16 +7,16 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String          @id @default(cuid())
   name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+  email         String?         @unique
   image         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  emailVerified DateTime?
   accounts      Account[]
-  sessions      Session[]
   projects      ProjectMember[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
 }
 
 model Account {
@@ -33,6 +33,7 @@ model Account {
   id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
 
@@ -45,24 +46,25 @@ model Session {
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  status  String  @default("active")
-  members     ProjectMember[]
-  files       File[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  inviteTokens  InviteToken[]
+  id           String          @id @default(cuid())
+  name         String
+  description  String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  status       String          @default("active")
+  files        File[]
+  inviteTokens InviteToken[]
+  members      ProjectMember[]
 }
 
 model ProjectMember {
   id        String  @id @default(cuid())
-  user      User    @relation(fields: [userId], references: [id])
   userId    String
-  project   Project @relation(fields: [projectId], references: [id])
   projectId String
   role      Role    @default(VIEWER)
+  project   Project @relation(fields: [projectId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
   @@unique([projectId, userId])
 }
 
@@ -70,10 +72,12 @@ model File {
   id        String   @id @default(cuid())
   name      String
   path      String
-  content   String   @default("")
-  project   Project  @relation(fields: [projectId], references: [id])
+  content   String?  @default("")
   projectId String
   updatedAt DateTime @updatedAt
+  type      String   @default("file")
+  project   Project  @relation(fields: [projectId], references: [id])
+
   @@unique([projectId, path])
 }
 
@@ -81,12 +85,12 @@ model InviteToken {
   id        String   @id @default(cuid())
   token     String   @unique @default(cuid())
   projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   role      Role     @default(EDITOR)
   expiresAt DateTime
   used      Boolean  @default(false)
-  createdBy String   
+  createdBy String
   createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "File" ADD COLUMN     "type" TEXT NOT NULL DEFAULT 'file',
+ALTER COLUMN "content" DROP NOT NULL;

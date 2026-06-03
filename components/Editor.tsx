@@ -18,12 +18,18 @@ interface EditorProps {
     onContentChange?: (content: string) => void;
     userName?: string;
     onAwarenessChange?: (users: { name: string, color: string }[]) => void
-    
+    aiStrength?: "off" | "normal" | "aggressive"
 }
 
-const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, onContentChange, fileId, userName, onAwarenessChange }) => {
+const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, onContentChange, fileId, userName, onAwarenessChange, aiStrength = "normal" }) => {
     const languageRef = useRef(language)      // create the ref
     languageRef.current = language
+
+    const aiStrengthRef = useRef(aiStrength)
+    aiStrengthRef.current = aiStrength
+
+
+
     return (
         <Editor
             height="100%"
@@ -147,6 +153,10 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
                                 }
 
                                 completionTimer.current = setTimeout(async () => {
+                                    if (aiStrengthRef.current === "off") {
+                                        resolve({ items: [] })
+                                        return
+                                    }
                                     try {
                                         const response = await fetch("/api/ai/complete", {
                                             method: "POST",
@@ -172,10 +182,10 @@ const EditorComponent: React.FC<EditorProps> = ({ language, value, projectId, on
                                     } catch (error) {
                                         resolve({ items: [] }) // Return empty completions on error
                                     }
-                                }, 600) // Adjust the delay as needed
+                                }, aiStrengthRef.current === "aggressive" ? 200 : 60) // Adjust the delay as needed
                             })
                         },
-                        freeInlineCompletions: () => {}
+                        freeInlineCompletions: () => { }
                     }
                 )
             }}

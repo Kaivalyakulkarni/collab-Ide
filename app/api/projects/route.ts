@@ -41,10 +41,19 @@ export const POST = auth(async (req) => {
                     userId: session.user.id,
                     role: "OWNER"
                 }
+            },
+            files:{
+                create: {
+                    name,
+                    path:`/${name}`,
+                    type: "folder",
+                    content: ""
+                }
             }
         },
         include: { members: true, files: true }
     })
+
 
     return NextResponse.json(project)
 })
