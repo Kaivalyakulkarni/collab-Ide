@@ -358,22 +358,27 @@ export default function ProjectDetailsPage() {
                                                 + go_to_editor
                                             </button>
                                         </div>
-                                        {project?.files?.length === 0 ? (
-                                            <div style={{ padding: "20px", fontSize: "11px", color: "#7F8C8D", fontFamily: "var(--font-jetbrains-mono)" }}>
-                                              // no files yet — open in ide to create files
-                                            </div>
-                                        ) : (
-                                            project?.files?.map((file: any) => (
-                                                <div key={file.id} className={style.fileRow}>
-                                                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" strokeWidth={2}>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                    </svg>
-                                                    <div className={style.fileName}>{file.name}</div>
-                                                    <div className={style.fileMsg}>{file.path}</div>
-                                                    <div className={style.fileTime}>{new Date(file.updatedAt).toLocaleDateString()}</div>
-                                                </div>
-                                            ))
-                                        )}
+                                        {project?.files
+                                            ?.sort((a: any, b: any) => a.path.localeCompare(b.path))
+                                            .map((file: any) => {
+                                                const depth = file.path.split("/").filter(Boolean).length - 1
+                                                return (
+                                                    <div key={file.id} className={style.fileRow} style={{ paddingLeft: `${20 + depth * 16}px` }}>
+                                                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"
+                                                            stroke={file.type === "folder" ? "#f59e0b" : "#60a5fa"}
+                                                            strokeWidth={2}>
+                                                            {file.type === "folder" ? (
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                            ) : (
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                            )}
+                                                        </svg>
+                                                        <div className={style.fileName}>{file.name}</div>
+                                                        <div className={style.fileMsg} style={{ fontSize: "10px", color: "#555" }}>{file.path}</div>
+                                                        <div className={style.fileTime}>{new Date(file.updatedAt).toLocaleDateString()}</div>
+                                                    </div>
+                                                )
+                                            })}
                                     </div>
 
                                     {/* Collaborators preview panel */}

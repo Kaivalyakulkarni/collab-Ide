@@ -42,11 +42,13 @@ wss.on("connection", (ws, req) => {
                 if (data.type === "resize") {
                     ptyProcess.resize(data.cols, data.rows)
                 }
-                else if(data.type === "init") {
-                    ptyProcess.write(`cat > /tmp/${data.fileName} << 'EOF'\n${data.content}\nEOF\n`)
+                else if (data.type === "init") {
+                    const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
+                    ptyProcess.write(`mkdir -p /tmp/workspace && cat > /tmp/workspace/${safeName} << 'ENDOFFILE'\n${data.content}\nENDOFFILE\n`)
                     setTimeout(() => {
+                        ptyProcess.write(`cd /tmp/workspace\n`)
                         ptyProcess.write(`clear\n`)
-                    },500)
+                    }, 500)
                 }
             } catch {
                 ptyProcess.write(msg.toString())

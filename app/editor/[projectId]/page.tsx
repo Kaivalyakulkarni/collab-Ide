@@ -14,11 +14,17 @@ import GitPanel from "@/components/GitPanel";
 
 import React from "react";
 
+import { useRouter } from "next/navigation"
+
+
 const EditorComponent = dynamic(() => import("@/components/Editor"), { ssr: false });
 
 export default function EditorPage({ params }: { params: Promise<{ projectId: string }> }) {
+    const router = useRouter()
+    const [isFullScreen, setIsFullScreen] = useState(false)
     const { projectId } = use(params);
     const [files, setFiles] = useState<FileNode[]>([])
+
 
     const fetchFiles = () => {
         fetch(`/api/projects/${projectId}/files`)
@@ -212,6 +218,64 @@ export default function EditorPage({ params }: { params: Promise<{ projectId: st
                             >
                                 {showTerminal ? "⊟ terminal" : "⊞ terminal"}
                             </span>
+                        </div>
+
+                        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "8px" }}>
+                            {/* Minimize - yellow */}
+                            <div
+                                onClick={() => setShowTerminal(false)}
+                                title="Minimize Terminal"
+                                style={{
+                                    width: "10px", height: "10px", borderRadius: "50%",
+                                    background: "#f59e0b", cursor: "pointer", flexShrink: 0,
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    fontSize: "12px", color: "transparent", transition: "all 0.15s"
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.color = "#000")}
+                                onMouseLeave={e => (e.currentTarget.style.color = "transparent")}
+                            >
+                                −
+                            </div>
+
+                            {/* Fullscreen - green */}
+                            <div
+                                onClick={() => {
+                                    if (!isFullScreen) {
+                                        document.documentElement.requestFullscreen()
+                                    } else {
+                                        document.exitFullscreen()
+                                    }
+                                    setIsFullScreen(prev => !prev)
+                                }}
+                                title="Toggle Fullscreen"
+                                style={{
+                                    width: "10px", height: "10px", borderRadius: "50%",
+                                    background: "#4ade80", cursor: "pointer", flexShrink: 0,
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    fontSize: "8px", color: "transparent", transition: "all 0.15s"
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.color = "#000")}
+                                onMouseLeave={e => (e.currentTarget.style.color = "transparent")}
+                            >
+                                ⤢
+                            </div>
+
+
+                            <div
+                                onClick={() => router.push(`/projects/${projectId}`)}
+                                title="Close Editor"
+                                style={{
+                                    width: "10px", height: "10px", borderRadius: "50%",
+                                    background: "#f87171", cursor: "pointer", flexShrink: 0,
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    fontSize: "10px", color: "transparent", transition: "all 0.15s"
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.color = "#000")}
+                                onMouseLeave={e => (e.currentTarget.style.color = "transparent")}
+                            >
+                                ×
+                            </div>
+
                         </div>
                     </div>
 

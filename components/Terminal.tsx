@@ -11,9 +11,10 @@ interface TerminalProps {
     fileId?: string;
     content?: string;
     language?: string;
+    fileName?: string;
 }
 
-const TerminalComponent = ({ onReady, fileId, content, language, onInitReady }: TerminalProps) => {
+const TerminalComponent = ({ onReady, fileId, content, language, onInitReady, fileName }: TerminalProps) => {
     const terminalRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -38,6 +39,12 @@ const TerminalComponent = ({ onReady, fileId, content, language, onInitReady }: 
                 fileName
             }))
         })
+
+        ws.onopen = () => {
+            if (content && language && fileName) {
+                ws.send(JSON.stringify({ type: "init", content, language, fileName }))
+            }
+        }
 
         ws.onerror = () => {
             term.write("\r\n\x1b[33mTerminal unavailable in production.\x1b[0m\r\n")
