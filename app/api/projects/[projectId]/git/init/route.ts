@@ -22,7 +22,7 @@ export async function POST(
         
         for (const file of files) {
             const filePath = `${dir}${file.name}`;
-            await fs.promises.writeFile(filePath, file.content);
+            await fs.promises.writeFile(filePath, file.content ?? "");
         }
         await git.init({ fs, dir });
         return new Response(JSON.stringify({ message: "Git repository initialized successfully" }), { status: 200 });
