@@ -23,7 +23,7 @@ export async function POST(
 
         for (const file of files) {
                 const filePath = `${dir}${file.name}`;
-                await fs.promises.writeFile(filePath, file.content);
+                await fs.promises.writeFile(filePath, file.content ?? "");
                 await git.add({fs,dir,filepath: file.name})
         }
         await git.commit({ fs, dir, message, author: { name: 'User', email: 'user@collabide.com' } });
