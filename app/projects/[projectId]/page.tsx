@@ -322,27 +322,30 @@ export default function ProjectDetailsPage() {
 
                                 {/* Stats row */}
                                 <div className={style.statRow}>
-                                    {/* status, collaborators, files, last updated */}
-                                    <div className={`${style.statCard} `}>
+                                    <div className={`${style.statCard}`}>
                                         <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#4ade80" }}></span>status</div>
-                                        <div className={`${style.statValue} text-green-500`}>Active</div>
-
-                                    </div>
-                                    <div className={`${style.statCard} `}>
-                                        <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#60a5fa" }}></span>collaborators</div>
-                                        <div className={`${style.statValue}`}>12
-                                            <span className=" ml-2 text-[14px] text-green-500"> active</span>
+                                        <div className={`${style.statValue}`} style={{ color: project?.status === "active" ? "#4ade80" : "#7F8C8D" }}>
+                                            {project?.status || "active"}
                                         </div>
                                     </div>
-                                    <div className={`${style.statCard} `}>
+                                    <div className={`${style.statCard}`}>
+                                        <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#60a5fa" }}></span>collaborators</div>
+                                        <div className={`${style.statValue}`}>{project?.members?.length || 0}</div>
+                                        <div className={`${style.statSub}`}>members</div>
+                                    </div>
+                                    <div className={`${style.statCard}`}>
                                         <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#BDC3C7" }}></span>total_files</div>
-                                        <div className={`${style.statValue}`}>12</div>
+                                        <div className={`${style.statValue}`}>
+                                            {project?.files?.filter((f: any) => f.type === "file").length || 0}
+                                        </div>
                                         <div className={`${style.statSub}`}>across all dirs</div>
                                     </div>
-                                    <div className={`${style.statCard} `}>
-                                        <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#f59e0b" }}></span>last_commit</div>
-                                        <div className={`${style.statValue}`}>2h ago</div>
-                                        <div className={`${style.statSub}`}>feat: git integration</div>
+                                    <div className={`${style.statCard}`}>
+                                        <div className={`${style.statLabel}`}><span className={`${style.statDot}`} style={{ background: "#f59e0b" }}></span>last_updated</div>
+                                        <div className={`${style.statValue}`}>
+                                            {project?.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : "—"}
+                                        </div>
+                                        <div className={`${style.statSub}`}>{project?.name}</div>
                                     </div>
                                 </div>
 

@@ -234,7 +234,7 @@ export default function Dashboard() {
                             projects
                             <span className={`${style.sidebarBadge}`}>{totalProjects}</span>
                         </a>
-                        
+
                     </div>
                     <div className={`${style.sidebarSection}`}>
                         <div className={`${style.sidebarLabel}`} style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>recent</div>
@@ -365,8 +365,10 @@ export default function Dashboard() {
                                                     {project.name.slice(0, 2).toUpperCase()}
                                                 </div>
                                                 <div className={`${style.projectStatus}`}>
-                                                    <span className={`${style.statusDot} ${style.statusActive}`}></span>
-                                                    active
+                                                    <span className={`${style.statusDot}`} style={{
+                                                        background: project.status === "active" ? "#4ade80" : project.status === "archived" ? "#7F8C8D" : "#60a5fa"
+                                                    }}></span>
+                                                    {project.status || "active"}
                                                 </div>
                                             </div>
                                             <div className={`${style.projectName} font-mono`}>{project.name}</div>
@@ -482,8 +484,10 @@ export default function Dashboard() {
                                                     {project.name.slice(0, 2).toUpperCase()}
                                                 </div>
                                                 <div className={`${style.projectStatus}`}>
-                                                    <span className={`${style.statusDot} ${style.statusActive}`}></span>
-                                                    active
+                                                    <span className={`${style.statusDot}`} style={{
+                                                        background: project.status === "active" ? "#4ade80" : project.status === "archived" ? "#7F8C8D" : "#60a5fa"
+                                                    }}></span>
+                                                    {project.status || "active"}
                                                 </div>
                                             </div>
                                             <div className={`${style.projectName} font-mono`}>{project.name}</div>
@@ -617,7 +621,7 @@ export default function Dashboard() {
 
                         </>
                     )}
-                    
+
 
 
 
