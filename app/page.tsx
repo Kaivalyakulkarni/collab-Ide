@@ -1,404 +1,1485 @@
 "use client";
 
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { signIn } from "next-auth/react";
-import { useEffect, useRef } from "react";
-import styles from "./landing.module.css";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { useEffect, useRef, useState } from "react";
+import { useSession } from "next-auth/react";
+import * as THREE from "three";
+import { Html, Sparkles, Grid } from "@react-three/drei";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
+
+import { ShaderGradient, ShaderGradientCanvas } from "shadergradient";
+
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+import {
+  SiNextdotjs, SiTypescript, SiThreedotjs, SiDocker,
+  SiSupabase, SiPrisma, SiGreensock, SiWebrtc, SiReact
+} from "react-icons/si";
+import { IconType } from "react-icons";
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 
-export default function Home() {
-  const revealRefs = useRef<HTMLDivElement[]>([]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add(styles.revealActive)
-        }
-      })
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' })
-
-    revealRefs.current.forEach(el => { if (el) observer.observe(el) })
-
-    return () => observer.disconnect()
-  }, [])
-
-  const addRevealRef = (el: HTMLDivElement | null) => {
-    if (el && !revealRefs.current.includes(el)) {
-      revealRefs.current.push(el);
-    }
-  };
-
-  const { data: session } = useSession()
-  const router = useRouter()
+function HeroTypewriter() {
+  const full = "A full-stack IDE that runs in the browser — real-time multiplayer editing, a sandboxed terminal, AI completions, and git, all in one tab.";
+  const [typed, setTyped] = useState(0);
 
   useEffect(() => {
-    if (session) {
-      router.push("/dashboard")
-    }
-  }, [session])
+    let i = 0;
+    const tick = () => {
+      i++;
+      setTyped(i);
+      if (i < full.length) {
+        const r = Math.random();
+        const delay = r < 0.05 ? 120 + Math.random() * 80 : 28 + Math.random() * 22;
+        setTimeout(tick, delay);
+      }
+    };
+    setTimeout(tick, 400);
+  }, []);
 
   return (
-    <div>
-      {/* Indentation Guidelines */}
-      <div style={{ "position": "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-        <div className={styles.indentGuide} style={{ left: "80px" }}></div>
-        <div className={`${styles.indentGuide} hidden md:block`} style={{ left: "120px" }}></div>
-        <div className={styles.indentGuide} style={{ right: "80px" }}></div>
+    <p className="hero-sub" style={{ minHeight: "4rem" }}>
+      {full.slice(0, typed)}
+      {typed < full.length && (
+        <span style={{
+          display: "inline-block",
+          width: 2, height: "1em",
+          background: "#F5A623",
+          marginLeft: 2,
+          verticalAlign: "middle",
+          animation: "cursorBlink 0.8s steps(2) infinite",
+        }} />
+      )}
+    </p>
+  );
+}
+
+
+// ============================================================
+// HERO SECTION
+// ============================================================
+
+function HeroSection() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const cursorDotRef = useRef<HTMLDivElement>(null);
+  const cursorTagRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const fadeOverlayRef = useRef<HTMLDivElement>(null);
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
+
+
+  useGSAP(() => {
+    // eyebrow — char by char
+    const eyebrow = document.querySelector(".hero-eyebrow");
+    if (eyebrow) {
+      const text = eyebrow.textContent || "";
+      eyebrow.textContent = "";
+      text.split("").forEach((char, i) => {
+        const span = document.createElement("span");
+        span.textContent = char === " " ? "\u00A0" : char;
+        span.style.display = "inline-block";
+        span.style.opacity = "0";
+        eyebrow.appendChild(span);
+        gsap.fromTo(span,
+          { opacity: 0, x: -12, filter: "blur(8px)" },
+          { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.5, delay: 0.1 + i * 0.03, ease: "power3.out" }
+        );
+      });
+    }
+
+    // h1 — char by char
+    const h1 = document.querySelector(".hero-h1");
+    if (h1) {
+      const nodes = Array.from(h1.childNodes);
+      h1.innerHTML = "";
+      nodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const chars = (node.textContent || "").split("");
+          chars.forEach((char, i) => {
+            const span = document.createElement("span");
+            span.textContent = char === " " ? "\u00A0" : char;
+            span.style.display = "inline-block";
+            span.style.opacity = "0";
+            h1.appendChild(span);
+            gsap.fromTo(span,
+              { opacity: 0, x: -16, filter: "blur(12px)" },
+              { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.6, delay: 0.3 + i * 0.025, ease: "power3.out" }
+            );
+          });
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          const chars = (el.textContent || "").split("");
+          chars.forEach((char, i) => {
+            const span = document.createElement("span");
+            span.textContent = char === " " ? "\u00A0" : char;
+            span.style.display = "inline-block";
+            span.style.opacity = "0";
+            span.style.color = el.style.color || "";
+            span.className = el.className || "";
+            h1.appendChild(span);
+            gsap.fromTo(span,
+              { opacity: 0, x: -16, filter: "blur(12px)" },
+              { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.6, delay: 0.3 + i * 0.025, ease: "power3.out" }
+            );
+          });
+          // preserve line break
+          if (el.tagName === "BR") h1.appendChild(document.createElement("br"));
+        }
+      });
+    }
+
+    gsap.from(".hero-ctas", { opacity: 0, y: 20, duration: 0.8, delay: 1.2 });
+    gsap.from(".hero-meta", { opacity: 0, duration: 0.8, delay: 1.4 });
+  }, []);
+
+  useEffect(() => {
+    const nav = document.querySelector(".hero-nav");
+    if (!nav) return;
+
+    const onScroll = () => {
+      if (window.scrollY > 80) {
+        nav.classList.add("scrolled");
+      } else {
+        nav.classList.remove("scrolled");
+      }
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const dot = cursorDotRef.current;
+    const tag = cursorTagRef.current;
+    if (!dot || !tag) return;
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+
+    let mx = 0, my = 0, dx = 0, dy = 0;
+    let raf: number;
+
+    const onMove = (e: MouseEvent) => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx + "px"; dot.style.top = my + "px";
+    };
+    window.addEventListener("mousemove", onMove);
+
+    const loop = () => {
+      dx += (mx - dx) * 0.18; dy += (my - dy) * 0.18;
+      tag.style.left = dx + "px"; tag.style.top = dy - 46 + "px";
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+
+    const targets = document.querySelectorAll("[data-cursor]");
+    const handlers: { el: Element; enter: () => void; leave: () => void }[] = [];
+    targets.forEach((el) => {
+      const enter = () => {
+        tag.textContent = el.getAttribute("data-cursor");
+        tag.classList.add("show");
+        dot.style.width = "0px"; dot.style.height = "0px";
+      };
+      const leave = () => {
+        tag.classList.remove("show");
+        dot.style.width = "10px"; dot.style.height = "10px";
+      };
+      el.addEventListener("mouseenter", enter);
+      el.addEventListener("mouseleave", leave);
+      handlers.push({ el, enter, leave });
+    });
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(raf);
+      handlers.forEach(({ el, enter, leave }) => {
+        el.removeEventListener("mouseenter", enter);
+        el.removeEventListener("mouseleave", leave);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const heroEl = heroRef.current;
+    if (!canvas || !heroEl) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let W: number, H: number;
+    const dpr = window.devicePixelRatio || 1;
+    const mouse = { x: -9999, y: -9999 };
+    const GLYPHS = "01{}[]<>/;()=+*$#&%01アｺﾆﾄ01010101".split("");
+
+    let particles: {
+      x: number; y: number; baseX: number; baseY: number;
+      ch: string; phase: number; speed: number;
+    }[] = [];
+
+    function resize() {
+      W = canvas!.width = canvas!.offsetWidth * dpr;
+      H = canvas!.height = canvas!.offsetHeight * dpr;
+    }
+    function initParticles() {
+      particles = [];
+      const cell = 34 * dpr;
+      const cols = Math.ceil(W / cell);
+      const rows = Math.ceil(H / cell);
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          particles.push({
+            x: i * cell + cell / 2, y: j * cell + cell / 2,
+            baseX: i * cell + cell / 2, baseY: j * cell + cell / 2,
+            ch: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+            phase: Math.random() * Math.PI * 2,
+            speed: 0.6 + Math.random() * 0.8,
+          });
+        }
+      }
+    }
+    resize(); initParticles();
+
+    const onResize = () => { resize(); initParticles(); };
+    window.addEventListener("resize", onResize);
+
+    const onMouseMove = (e: MouseEvent) => {
+      const r = heroEl.getBoundingClientRect();
+      mouse.x = (e.clientX - r.left) * dpr;
+      mouse.y = (e.clientY - r.top) * dpr;
+    };
+    const onMouseLeave = () => { mouse.x = -9999; mouse.y = -9999; };
+    heroEl.addEventListener("mousemove", onMouseMove);
+    heroEl.addEventListener("mouseleave", onMouseLeave);
+
+    let t = 0, raf: number;
+    function animate() {
+      t += 0.016;
+      ctx!.clearRect(0, 0, W, H);
+      ctx!.font = `${11 * dpr}px 'JetBrains Mono', monospace`;
+      ctx!.textAlign = "center"; ctx!.textBaseline = "middle";
+      for (const p of particles) {
+        const wave =
+          Math.sin(t * p.speed + p.baseX * 0.01) * 6 * dpr +
+          Math.cos(t * p.speed * 0.7 + p.baseY * 0.012) * 4 * dpr;
+        const ddx = p.baseX - mouse.x, ddy = p.baseY - mouse.y;
+        const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+        const radius = 220 * dpr;
+        let push = 0, opacityBoost = 0;
+        if (dist < radius) {
+          const force = 1 - dist / radius;
+          push = force * 26 * dpr; opacityBoost = force;
+        }
+        const angle = Math.atan2(ddy, ddx);
+        p.x = p.baseX + Math.cos(angle) * push;
+        p.y = p.baseY + wave + Math.sin(angle) * push * 0.3;
+        const baseAlpha = 0.1 + Math.sin(t * p.speed + p.baseX * 0.02) * 0.04;
+        const alpha = Math.min(0.85, baseAlpha + opacityBoost * 0.6);
+        const isAmber = opacityBoost > 0.35;
+        ctx!.fillStyle = isAmber ? `rgba(245,166,35,${alpha})` : `rgba(189,195,199,${alpha * 0.7})`;
+        ctx!.fillText(p.ch, p.x, p.y);
+      }
+      raf = requestAnimationFrame(animate);
+    }
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      heroEl.removeEventListener("mousemove", onMouseMove);
+      heroEl.removeEventListener("mouseleave", onMouseLeave);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <>
+      <style>{`
+        .hero-wrap * { box-sizing: border-box;}
+        .hero-wrap { font-family: 'Inter', sans-serif; color: #f5f5f4; width:100%; height:100%; }
+        .hero-wrap p { font-family: 'JetBrains Mono', monospace; }
+        .hero-wrap h1 { font-family: 'Inter', sans-serif; }
+        #cursor-dot {
+          position: fixed; top:0; left:0; width:12px; height:12px; border-radius:50%;
+          background:#F5A623; pointer-events:none; z-index:9999;
+          transform: translate(-50%,-50%); mix-blend-mode: difference;
+          transition: width .2s, height .2s;
+        }
+        #cursor-tag {
+          position: fixed; top:0; left:0; z-index:9998; pointer-events:none;
+          font-family:'JetBrains Mono', monospace; font-size:.72rem; font-weight:600;
+          background:#F5A623; color:#1a1206; padding:6px 12px; border-radius:20px;
+          white-space:nowrap; opacity:0; transform: translate(-50%,-50%) scale(.7);
+          transition: opacity .22s ease, transform .22s ease;
+        }
+        #cursor-tag.show { opacity:1; transform: translate(-50%,-50%) scale(1); }
+        @media (hover:none), (pointer:coarse) { #cursor-dot, #cursor-tag { display:none; } }
+        .hero-section {
+          position: relative; min-height: 100vh; width:100%; background: #050505;
+          display:flex; flex-direction:column; justify-content:center;
+          padding-top: 90px; overflow: hidden;
+        }
+        #wave-canvas {
+          position:absolute; inset:0; width:100%; height:100%; z-index:0;
+          mask-image: linear-gradient(to bottom, black 55%, transparent 96%);
+        }
+        .hero-nav {
+          position:fixed; top:0; left:50%; transform:translateX(-50%);
+          width:100%; z-index:100;
+          display:flex; align-items:center; justify-content:space-between;
+          padding:16px 32px;
+          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          background: rgba(5,5,5,0.8);
+          border: 1px solid transparent;
+          border-radius: 0px;
+          transition: width 0.6s cubic-bezier(0.16,1,0.3,1),
+              border-radius 0.6s cubic-bezier(0.16,1,0.3,1),
+              top 0.6s cubic-bezier(0.16,1,0.3,1),
+              padding 0.6s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.6s ease,
+              opacity 0.4s ease;
+        }
+        .hero-nav.scrolled {
+          top:16px;
+          width:60%;
+          border-radius: 16px;
+          border-color: rgba(255,255,255,0.06);
+          background: rgba(5,5,5,0.6);
+          padding:14px 28px;
+        }
+        .hero-logo { font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.02rem; color:#fff; display:flex; gap:.5rem; }
+        .hero-logo .dot { color:#F5A623; }
+        .hero-navlinks { display:flex; gap:2.4rem; font-family:'JetBrains Mono', monospace; font-size:.84rem; color:#7d8488; }
+        .hero-navlinks a { color:#7d8488; text-decoration:none; transition: color 0.2s ease;       cursor:pointer; }
+        .hero-navlinks a:hover { color:#F5A623; }
+        .hero-nav-cta {
+          font-family:'JetBrains Mono', monospace; font-size:.82rem; font-weight:600;
+          background:#F5A623; color:#1a1206; padding:9px 18px; border-radius:7px; border:1px solid #F5A623;
+        }
+        .hero-inner { position:relative; z-index:2; width:100%; margin:0 auto; padding:0 32px; }
+        .hero-eyebrow {
+          font-family:'JetBrains Mono', monospace; font-size:.78rem; letter-spacing:.04em; color:#F5A623;
+          display:flex; align-items:center; margin-bottom:1.1rem; text-transform:lowercase;
+        }
+        .hero-eyebrow::before { content:''; width:7px; height:7px; border-radius:50%; background:#F5A623; margin-right:8px; box-shadow:0 0 10px #F5A623; }
+        .hero-h1 { font-weight:800; font-size:clamp(2.6rem, 6.4vw, 5.4rem); line-height:1.03; letter-spacing:-.02em; max-width:880px; }
+        .hero-h1 .accent { color:#F5A623; }
+        .hero-sub { margin-top:1.7rem; font-size:1.12rem; color:#7d8488; max-width:560px; line-height:1.65; }
+        .hero-ctas { display:flex; gap:1rem; margin-top:2.6rem; flex-wrap:wrap; }
+        .hero-btn-primary {
+          font-family:'JetBrains Mono', monospace; font-size:.9rem; font-weight:600;
+          background:#F5A623; color:#1a1206; padding:14px 26px; border-radius:8px; border:1px solid #F5A623;
+          display:flex; align-items:center; gap:.6rem;
+        }
+        .hero-btn-secondary {
+          font-family:'JetBrains Mono', monospace; font-size:.9rem; font-weight:500;
+          background:transparent; color:#BDC3C7; padding:14px 26px; border-radius:8px; border:1px solid #1a1a1a;
+          display:flex; align-items:center; gap:.6rem;
+        }
+        .hero-scroll-cue { position:absolute; bottom:28px; left:32px; z-index:2; font-family:'JetBrains Mono', monospace; font-size:.72rem; color:#7d8488; display:flex; align-items:center; gap:.6rem; }
+        .hero-scroll-cue .line { width:1px; height:34px; background:#1a1a1a; position:relative; overflow:hidden; }
+        .hero-scroll-cue .line::after {
+          content:''; position:absolute; top:0; left:0; width:100%; height:40%; background:#F5A623;
+          animation: scrolldown 1.8s ease-in-out infinite;
+        }
+        @keyframes scrolldown { 0%{transform:translateY(-100%);} 100%{transform:translateY(250%);} }
+      `}</style>
+      <div className="hero-wrap" id="hero-wrapper" ref={heroRef}>
+        <div id="cursor-dot" ref={cursorDotRef}></div>
+        <div id="cursor-tag" ref={cursorTagRef}></div>
+        <div className="hero-nav">
+          <div className="hero-logo">collab<span className="dot">_</span>ide</div>
+          <div className="hero-navlinks">
+            <a href="#workspace-wrapper" onClick={(e) => {
+              e.preventDefault();
+              document.querySelector("#workspace-wrapper")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}>features</a>
+            <a href="#stack-section" onClick={(e) => {
+              e.preventDefault();
+              document.querySelector("#stack-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}>stack</a>
+            <a href="#footer-wrapper" onClick={(e) => {
+              e.preventDefault();
+              document.querySelector("#footer-wrapper")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}>workspace</a>
+          </div>
+          <a className="hero-nav-cta" data-cursor="launch →"
+            href={isLoggedIn ? "/dashboard" : "/api/auth/signin"}>
+            {isLoggedIn ? "open_in_ide()" : "login()"}
+          </a>
+        </div>
+        <section className="hero-section">
+          <canvas id="wave-canvas" ref={canvasRef}></canvas>
+          <div className="hero-inner">
+            <div className="hero-eyebrow">project.init() — collaborative cloud ide</div>
+            <h1 className="hero-h1">
+              Code together,<br /><span className="accent">ship</span> from the cloud
+            </h1>
+            <HeroTypewriter />
+            <div className="hero-ctas">
+              <a className="hero-btn-primary" data-cursor="open()"
+                href={isLoggedIn ? "/dashboard" : "/api/auth/signin"}>
+                {isLoggedIn ? "launch_ide() →" : "launch_ide() →"}
+              </a>
+              <a className="hero-btn-secondary" data-cursor="github ↗"
+                href="https://github.com/Kaivalyakulkarni/collab-Ide"
+                target="_blank" rel="noreferrer">
+                view on github
+              </a>
+            </div>
+          </div>
+          <div className="hero-scroll-cue"><div className="line"></div>scroll</div>
+        </section>
+        <div ref={fadeOverlayRef} style={{ position: "fixed", inset: 0, background: "#050505", opacity: 0, pointerEvents: "none", zIndex: 50 }} />
+      </div>
+    </>
+  );
+}
+
+
+// ============================================================
+// MARQUEE — tech stack scrolling strip
+// ============================================================
+
+const STACK_ITEMS: { label: string; color: string; Icon?: IconType }[] = [
+  { label: "Next.js", color: "#BDC3C7", Icon: SiNextdotjs },
+  { label: "TypeScript", color: "#BDC3C7", Icon: SiTypescript },
+  { label: "React", color: "#BDC3C7", Icon: SiReact },
+  { label: "Three.js", color: "#BDC3C7", Icon: SiThreedotjs },
+  { label: "Yjs CRDTs", color: "#BDC3C7" },   // no Icon — glowing dot
+  { label: "Docker", color: "#BDC3C7", Icon: SiDocker },
+  { label: "Supabase", color: "#BDC3C7", Icon: SiSupabase },
+  { label: "Prisma", color: "#BDC3C7", Icon: SiPrisma },
+  { label: "GSAP", color: "#BDC3C7", Icon: SiGreensock },
+  { label: "Monaco Editor", color: "#BDC3C7" },  // also no icon — same treatment
+];
+
+const DOUBLED = [...STACK_ITEMS, ...STACK_ITEMS];
+
+function Marquee({ isReversed = false }: { isReversed?: boolean }) {
+  const movingRef = useRef<HTMLDivElement>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const scaleTweenRef = useRef<gsap.core.Tween | null>(null);
+
+  useGSAP(() => {
+    gsap.set(movingRef.current, { xPercent: isReversed ? -50 : 0 });
+    tlRef.current = gsap.timeline({ defaults: { ease: "none", repeat: -1 } })
+      .to(movingRef.current, { xPercent: isReversed ? 0 : -50, duration: 25 })
+      .set(movingRef.current, { xPercent: isReversed ? -50 : 0 });
+  }, { dependencies: [isReversed] });
+
+  const onEnter = () => {
+    scaleTweenRef.current?.kill();
+    scaleTweenRef.current = gsap.to(tlRef.current!, { timeScale: 0.2, duration: 0.4 });
+  };
+  const onLeave = () => {
+    scaleTweenRef.current?.kill();
+    scaleTweenRef.current = gsap.to(tlRef.current!, { timeScale: 1, duration: 0.3 });
+  };
+
+  return (
+    <div
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      style={{
+        overflow: "hidden",
+        width: "100%",
+        maskImage: "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)",
+      }}
+    >
+      <div ref={movingRef} style={{ display: "flex", width: "fit-content" }}>
+        {DOUBLED.map((item, i) => (
+          <div key={i} style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "0 32px", flexShrink: 0,
+          }}>
+            {item.Icon ? (
+              <item.Icon style={{ color: item.color, fontSize: 18, opacity: 0.9 }} />
+            ) : (
+              <span style={{
+                width: 7, height: 7, borderRadius: "50%",
+                background: "#BDC3C7",
+                boxShadow: "0 0 8px #F59E0B",
+                flexShrink: 0,
+              }} />
+            )}
+            <span style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 12, fontWeight: 600,
+              color: item.color, whiteSpace: "nowrap", opacity: 0.85,
+            }}>
+              {item.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// PANEL: FAKE IDE EDITOR (Section 1)
+// ============================================================
+
+function FakeEditor() {
+  const allCode = [
+    "// Real-time multiplayer editing",
+    "const session = await collab.join(roomId);",
+    "session.onCursorMove((user, pos) => {",
+    "  renderCursor(user.color, pos);",
+    "});",
+    "session.onEdit((delta) => {",
+    "  applyDelta(editor, delta);",
+    "});",
+  ];
+
+  const users = [
+    { name: "Kaivalya", color: "#F59E0B", lines: [0, 4] },
+    { name: "Sarah", color: "#A855F7", lines: [1, 5] },
+    { name: "Ishu", color: "#22C55E", lines: [2, 6] },
+    { name: "Rohan", color: "#3B82F6", lines: [3, 7] },
+  ];
+
+  const [lineTexts, setLineTexts] = useState<string[]>(Array(8).fill(""));
+  const [activeLine, setActiveLine] = useState<number[]>([0, 1, 2, 3]); // global line index each user is on
+
+  useEffect(() => {
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+
+    users.forEach((user, ui) => {
+      let lineIdxInUser = 0;
+      let charIdx = 0;
+
+      const typeNext = () => {
+        const globalLine = user.lines[lineIdxInUser];
+        const fullText = allCode[globalLine];
+
+        if (charIdx <= fullText.length) {
+          const captured = charIdx;
+          setLineTexts(prev => {
+            const next = [...prev];
+            next[globalLine] = fullText.slice(0, captured);
+            return next;
+          });
+          setActiveLine(prev => {
+            const next = [...prev];
+            next[ui] = globalLine;
+            return next;
+          });
+          charIdx++;
+
+          // random typing rhythm
+          const r = Math.random();
+          const delay =
+            r < 0.04 ? 1200 + Math.random() * 1000  // long thinking pause
+              : r < 0.12 ? 300 + Math.random() * 400  // short pause
+                : 80 + Math.random() * 120;             // normal typing — was 28-55, now 80-200
+
+          timeouts.push(setTimeout(typeNext, delay));
+        } else {
+          // finished line — move to next after pause, clear old line on loop
+          const prevGlobalLine = globalLine;
+          lineIdxInUser = lineIdxInUser + 1;
+          if (lineIdxInUser >= user.lines.length) return;
+          charIdx = 0;
+          const nextGlobalLine = user.lines[lineIdxInUser];
+
+          timeouts.push(setTimeout(() => {
+            // clear next line before retyping (loop reset)
+            setLineTexts(prev => {
+              const next = [...prev];
+              next[nextGlobalLine] = "";
+              return next;
+            });
+            typeNext();
+          }, 300 + Math.random() * 500));
+        }
+      };
+
+      // stagger each user's start
+      timeouts.push(setTimeout(typeNext, ui * 400 + Math.random() * 300));
+    });
+
+    return () => timeouts.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div style={{
+      width: "680px", background: "#0d0d0d", border: "1px solid #1a1a1a",
+      borderRadius: "10px", overflow: "hidden",
+      fontFamily: "'JetBrains Mono', monospace",
+      boxShadow: "0 0 80px rgba(245,158,11,0.15), 0 30px 60px rgba(0,0,0,0.7)",
+    }}>
+      {/* title bar */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderBottom: "1px solid #1a1a1a", background: "#111" }}>
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 12, fontSize: 11, color: "#7F8C8D" }}>collab-ide · filename.ts</span>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
+          {users.map((u, i) => (
+            <div key={u.name} style={{
+              width: 20, height: 20, borderRadius: "50%", background: u.color,
+              color: "#fff", fontSize: 9, fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              border: "2px solid #0d0d0d", marginLeft: i === 0 ? 0 : -6,
+              boxShadow: `0 0 8px ${u.color}88`,
+            }}>{u.name[0]}</div>
+          ))}
+          <span style={{ fontSize: 10, color: "#22C55E", marginLeft: 8 }}>● 4 online</span>
+        </div>
       </div>
 
-      {/* NavBar */}
-      <nav style={{ position: "fixed", top: 0, width: "100%", zIndex: 50, backdropFilter: "blur(12px)", borderBottom: "1px solid #1a1a1a", background: "rgba(5,5,5,0.6)", height: "56px", display: "flex", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", padding: "0 20px", height: "100%", width: "100%", maxWidth: "1440px", margin: "0 auto" }}>
+      {/* code area */}
+      <div style={{ padding: "16px 0", minHeight: 220 }}>
+        {allCode.map((_, lineIdx) => {
+          const activeUserIdx = users.findIndex((u, ui) => activeLine[ui] === lineIdx);
+          const activeUser = activeUserIdx !== -1 ? users[activeUserIdx] : null;
+          const displayText = lineTexts[lineIdx];
 
-          {/* Logo + tabs */}
-          <div style={{ display: "flex", alignItems: "center", gap: "24px", height: "100%" }}>
+          return (
+            <div key={lineIdx} style={{ display: "flex", padding: "3px 16px", minHeight: 20 }}>
+              <span style={{ width: 24, color: "rgba(127,140,141,0.3)", fontSize: 11, userSelect: "none", flexShrink: 0 }}>
+                {lineIdx + 1}
+              </span>
+              <span style={{ fontSize: 12, color: "#ECF0F1", whiteSpace: "pre" }}>
+                {displayText}
+                {activeUser && (
+                  <span style={{ position: "relative", display: "inline-block" }}>
+                    {/* label follows cursor */}
+                    <span style={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: 0,
+                      background: activeUser.color,
+                      color: "#fff",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      padding: "2px 6px",
+                      borderRadius: 3,
+                      whiteSpace: "nowrap",
+                      marginBottom: 2,
+                      pointerEvents: "none",
+                    }}>{activeUser.name}</span>
+                    {/* blinking cursor bar */}
+                    <span style={{
+                      display: "inline-block",
+                      width: 2,
+                      height: 13,
+                      background: activeUser.color,
+                      verticalAlign: "middle",
+                      animation: `blink${activeUserIdx} 0.8s steps(2) infinite`,
+                    }} />
+                  </span>
+                )}
+              </span>
+            </div>
+          );
+        })}
+      </div>
 
-            <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: "1rem", fontWeight: "bold", color: "#BDC3C7" }}>
-              {/* Logo */}
-              <svg
-                fill="#ffffff"
-                width="19px"
-                height="19px"
-                viewBox="-3.6 -3.6 43.20 43.20"
-                preserveAspectRatio="xMidYMid meet"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                stroke="#ffffff"
-                transform="matrix(1, 0, 0, 1, 0, 0)"
-                strokeWidth={0.00036}
+      {/* terminal strip */}
+      <div style={{ borderTop: "1px solid #1a1a1a", background: "#000", padding: "10px 16px", fontSize: 11, color: "#7F8C8D" }}>
+        <span style={{ color: "#5fbf77" }}>/tmp/workspace #</span> _
+      </div>
 
-              >
-                <g id="SVGRepo_bgCarrier" strokeWidth={0} />
-                <g
-                  id="SVGRepo_tracerCarrier"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  stroke="#ffffff"
-                  strokeWidth={0.21600000000000003}
-                />
-                <g id="SVGRepo_iconCarrier">
-                  <title>{"terminal-solid"}</title>
-                  <path
-                    d="M32,5H4A2,2,0,0,0,2,7V29a2,2,0,0,0,2,2H32a2,2,0,0,0,2-2V7A2,2,0,0,0,32,5ZM6.8,15.81V13.17l10,4.59v2.08l-10,4.59V21.78l6.51-3ZM23.4,25.4H17V23h6.4ZM4,9.2V7H32V9.2Z"
-                    className="clr-i-solid clr-i-solid-path-1"
-                  />
-                  <rect x={0} y={0} width={36} height={36} fillOpacity={0} />
-                </g>
-              </svg>
-              collab_ide
-            </span>
-            <div style={{ display: "flex", height: "100%", alignItems: "flex-end" }} className="hiddden md:flex">
-              <a href="#" className={`${styles.navTab} ${styles.navTabActive}`} style={{ padding: "0 24px", height: "40px", display: "flex", alignItems: "center", fontSize: "12px", fontFamily: "monospace" }}>
-                features.tsx
-              </a>
-              <a href="#" className={`${styles.navTab} ${styles.navTabInActive}`} style={{ padding: "0 24px", height: "40px", display: "flex", alignItems: "center", fontSize: "12px", fontFamily: "monospace" }}>
-                pricing.json
-              </a>
-              <a href="#" className={`${styles.navTab} ${styles.navTabInActive}`} style={{ padding: "0 24px", height: "40px", display: "flex", alignItems: "center", fontSize: "12px", fontFamily: "monospace" }}>
-                docs.md
-              </a>
-            </div>
-          </div>
-
-          {/* Auth Buttons */}
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "16px" }}>
-            <button onClick={() => signIn("github", { callbackUrl: "/dashboard" })} style={{ fontFamily: "monospace", fontSize: "13px", color: "#7F8C8D", background: "none", border: "none", cursor: "pointer" }}>
-              login()
-            </button>
-            <button onClick={() => signIn("github", { callbackUrl: "/dashboard" })} className={styles.btnFunc} style={{ background: "#BDC3C7", color: "#000", padding: "6px 16px", borderRadius: "4px", fontSize: "13px", fontWeight: "bold", border: "none", cursor: "pointer" }}>
-              getStarted()
-            </button>
-          </div>
-        </div>
-      </nav>
-
-
-      {/* Hero Section */}
-      <main className="relative z-10 pt-20">
-
-        {/* Hero Content */}
-        <section className="px-10 md:px-40" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh" }} >
-          <div style={{ width: "100%", maxWidth: "900px" }}>
-            <div className={styles.codeGlass} style={{ borderRadius: "12px", overflow: "hidden" }}>
-              <div style={{ background: "rgba(26, 26, 26, 0.5)", padding: "16px 20px", borderBottom: "1px solid #1a1a1a", display: "flex", alignItems: "center", gap: "10px" }}>
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-gray-800"></div>
-                  <div className="w-3 h-3 rounded-full bg-gray-800"></div>
-                  <div className="w-3 h-3 rounded-full bg-gray-800"></div>
-                </div>
-                <span className="ml-4 font-mono text-[11px] text-on-surrface-varient tracking-wide uppercase text-gray-400">
-                  src/components/Hero.tsx
-                </span>
-              </div>
-              <div className="p-4 md:p-13 font-mono">
-                <div className="mb-10">
-                  <span className={styles.syntaxComment} style={{ display: "block", marginBottom: "1rem" }} >/**<br />* @version 2.0.0 <br />* @theme Technical-Silver <br />*/ </span>
-                  {/* line 1 */}
-                  <div className="flex items-start gap-4">
-                    <span style={{ color: "rgba(127, 140, 141, 0.3)", userSelect: "none", width: "32px", textAlign: "right" }}>01</span>
-                    <div>
-                      <span className={styles.syntaxKeyword}>const</span><span className={styles.syntaxFunc}> Headline </span>
-                      {"= () => {"}
-                    </div>
-                  </div>
-                  {/* line 2 */}
-                  <div className="flex items-start gap-4 mt-4">
-                    <span style={{ color: "rgba(127, 140, 141, 0.3)", userSelect: "none", width: "32px", textAlign: "right" }}>02</span>
-                    <div className="pl-8">
-                      <span className={styles.syntaxKeyword}>return</span>{" ("}
-                    </div>
-                  </div>
-                  {/* line 3 */}
-                  <div className="flex items-start gap-4 mt-4">
-                    <span className="mx-3" style={{ color: "rgba(127, 140, 141, 0.3)", userSelect: "none", width: "32px", textAlign: "right" }}>03</span>
-                    <div className="pl-16">
-                      <h1 className="text-[45px] md:text-[84px] font-bold font-sans tracking-tight leading-none text-on-surface">
-                        Code Together,
-                        <span className={styles.syntaxPrimary}> Faster</span> than Ever.
-                      </h1>
-                    </div>
-                  </div>
-                  {/* line 4 */}
-                  <div className="flex items-start gap-4 mt-8">
-                    <span style={{ color: "rgba(127, 140, 141, 0.3)", userSelect: "none", width: "32px", textAlign: "right" }}>04</span>
-                    <div className="pl-16">
-                      <p className="font-sans text-[18px] text-on-surface-variant max-w-xl leading-relaxed mx-3">
-                        The high-performance collaborative IDE for modern engineering teams. Real-time
-                        synchronization, isolated Docker environments.
-                      </p>
-                    </div>
-                  </div>
-                  {/* line 5 */}
-                  <div className="flex items-start gap-4 mt-12">
-                    <span style={{ color: "rgba(127, 140, 141, 0.3)", userSelect: "none", width: "32px", textAlign: "right" }}>05</span>
-                    <div className="pl-16 flex flex-wrap gap-6">
-                      <button
-                        onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
-                        className={`${styles.btnFunc} px-8 py-4 rounded-lg font-bold flex items-center gap-3 font-mono`}
-                        style={{ background: "#BDC3C7", color: "#000",fontFamily:"var(--font-jetbrains-mono)" }}
-                      >
-                        github.auth() →
-                      </button>
-                      <button
-                        className={`${styles.btnFunc} px-8 py-4 rounded-lg font-bold flex items-center gap-3`}
-                        style={{ border: "1px solid rgba(189,195,199,0.4)", color: "#BDC3C7", background: "none", cursor: "pointer" ,fontFamily:"var(--font-jetbrains-mono)" }}
-                      >
-                        watchDemo(video_id)
-                      </button>
-                    </div>
-                  </div>
-                  {/* line 6 */}
-                  <div className="flex items-start gap-4 mt-8">
-                    <span style={{ color: "rgba(127, 140, 141, 0.3)", userSelect: "none", width: "32px", textAlign: "right" }}>06</span>
-                    <div className="pl-8">
-                      {");"}
-                    </div>
-                  </div>
-                  {/* line 7 */}
-                  <div className="flex items-start gap-4 mt-2">
-                    <span style={{ color: "rgba(127, 140, 141, 0.3)", userSelect: "none", width: "32px", textAlign: "right" }}>07</span>
-                    <div>
-                      {"};"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Marquee with Tech Tags */}
-        <div style={{ borderTop: "1px solid #1a1a1a", borderBottom: "1px solid #1a1a1a", background: "rgba(10,10,10,0.5)", padding: "24px 0", overflow: "hidden", marginTop: "30px" }}>
-          <div className={styles.marquee} style={{ whiteSpace: "nowrap", padding: "0 40px" }}>
-            <span className="font-mono text-[12px] text-on-surface-variant flex items-center gap-2"><span
-              className={styles.syntaxAttr}>import</span> {"{ NextJS }"} from 'web-stack'</span>
-            <span className="font-mono text-[12px] text-on-surface-variant flex items-center gap-2"><span
-              className={styles.syntaxAttr}>import</span> {"{ Monaco }"} from 'editors'</span>
-            <span className="font-mono text-[12px] text-on-surface-variant flex items-center gap-2"><span
-              className={styles.syntaxAttr}>import</span> {"{ CRDT }"} from 'sync-engines'</span>
-            <span className="font-mono text-[12px] text-on-surface-variant flex items-center gap-2"><span
-              className={styles.syntaxAttr}>import</span> {"{ Docker }"} from 'runtime'</span>
-            <span className="font-mono text-[12px] text-on-surface-variant flex items-center gap-2"><span
-              className={styles.syntaxAttr}>import</span> {"{Groq}"} from 'ai-accelerators'</span>
-            <span className="font-mono text-[12px] text-on-surface-variant flex items-center gap-2"><span
-              className={styles.syntaxAttr}>import</span> {"{ NextJS }"} from 'web-stack'</span>
-            <span className="font-mono text-[12px] text-on-surface-variant flex items-center gap-2"><span
-              className={styles.syntaxAttr}>import</span> {"{ Monaco }"} from 'editors'</span>
-          </div>
-        </div>
-
-        {/* Features section */}
-        <section className="py-32 px-10 md:px-40 relative">
-          <div className="max-w-[1200px] mx-auto">
-            <div className={`${styles.reveal} ${styles.revealActive}`} style={{ marginBottom: "60px" }}>
-              <h2
-                className={`${styles.syntaxKeyword} font-mono text-[14px] mb-4 uppercase font-bold`}
-                style={{ letterSpacing: "0.2em" }}
-              >
-                // Engineered for Flow
-              </h2>
-              <h3 className="text-[40px] font-bold tracking-tight text-on-surface">
-                Precision instruments for <br /> high-frequency shipping.
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "1px", background: "rgba(26,26,26,0.4)", border: "1px solid rgba(26,26,26,0.4)" }}>
-              {/* Feature 1 */}
-              <div ref={addRevealRef} className={`${styles.reveal} ${styles.revealActive}`} style={{ background: "#050505", padding: "40px", transitionDelay: "100ms" }}>
-                <div className="font-mono mb-6">
-                  <span className="mr-4" style={{ color: "rgba(127, 140, 141, 0.3)" }}>01</span>
-                  <span className={`${styles.syntaxAttr}`}>SyncEngine</span>.<span style={{ color: "#ECF0F1" }}>init</span>{"()"}
-                </div>
-                <h4 className="text-[20px] font-bold mb-4 text-on-surface">
-                  Deterministic Sync
-                </h4>
-                <p className="leading-relaxed font-light" style={{ color: "#7F8C8D" }}>Advanced conflict resolution via
-                  Yjs protocols. Zero latency shared state for 100+ concurrent editors.</p>
-              </div>
-              {/* Feature 2 */}
-              <div ref={addRevealRef} className={`${styles.reveal} ${styles.revealActive}`} style={{ background: "#050505", padding: "40px", transitionDelay: "100ms" }}>
-                <div className="font-mono mb-6">
-                  <span className="mr-4" style={{ color: "rgba(127, 140, 141, 0.3)" }}>02</span>
-                  <span className={`${styles.syntaxAttr}`}>AiAgent</span>.<span style={{ color: "#ECF0F1" }}>complete</span>{"()"}
-                </div>
-                <h4 className="text-[20px] font-bold mb-4 text-on-surface">
-                  Groq Acceleration
-                </h4>
-                <p className="leading-relaxed font-light" style={{ color: "#7F8C8D" }}>Sub-100ms contextual completions
-                  using Groq LPU™ technology. Instant logic generation at your fingertips.</p>
-              </div>
-              {/* Feature 3 */}
-              <div ref={addRevealRef} className={`${styles.reveal} ${styles.revealActive}`} style={{ background: "#050505", padding: "40px", transitionDelay: "100ms" }}>
-                <div className="font-mono mb-6">
-                  <span className="mr-4" style={{ color: "rgba(127, 140, 141, 0.3)" }}>03</span>
-                  <span className={`${styles.syntaxAttr}`}>Environment</span>.<span style={{ color: "#ECF0F1" }}>spawn</span>{"()"}
-                </div>
-                <h4 className="text-[20px] font-bold mb-4 text-on-surface">
-                  Cloud Sandboxes
-                </h4>
-                <p className="leading-relaxed font-light" style={{ color: "#7F8C8D" }}>Spin up full-stack Docker
-                  containers in seconds. Root terminal access with pre-configured toolchains.</p>
-              </div>
-              {/* Feature 4 */}
-              <div ref={addRevealRef} className={`${styles.reveal} ${styles.revealActive}`} style={{ background: "#050505", padding: "40px", transitionDelay: "100ms" }}>
-                <div className="font-mono mb-6">
-                  <span className="mr-4" style={{ color: "rgba(127, 140, 141, 0.3)" }}>04</span>
-                  <span className={`${styles.syntaxAttr}`}>Git</span>.<span style={{ color: "#ECF0F1" }}>rebase</span>{"()"}
-                </div>
-                <h4 className="text-[20px] font-bold mb-4 text-on-surface">
-                  Deep Integration
-                </h4>
-                <p className="leading-relaxed font-light" style={{ color: "#7F8C8D" }}>Native branch management and
-                  visual diffing. Direct integration with GitHub and GitLab workflows.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Impact Section */}
-        <section className="py-40" style={{ background: "rgba(10,10,10,0.4)" }}>
-          <div className="max-w-5xl mx-auto px-10 text-center">
-            <div className={`${styles.reveal} ${styles.revealActive} px-4 py-1 mb-10 inline-block rounded`} style={{ border: "1px solid rgba(189, 195, 199, 0.3)", background: "rgba(189, 195, 199, 0.05)" }}>
-              <span className="font-mono text-[12px]" style={{ color: "#BDC3C7" }}>{"system.check(): healthy_performance"}</span>
-            </div>
-            <h2 className="text-[48px] md:text-[64px] font-bold mb-16 tracking-tighter">
-              Ship <span className={styles.syntaxFunc}>code</span>, <br />not  <span className={styles.syntaxAttr}>configuration</span>
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 font-mono">
-              <div className="p-8 border rounded-lg bg-black" style={{ borderColor: "rgba(26, 26, 26, 0.5)" }}>
-                <div className="text-[36px] font-bold mb-2" style={{ color: "#BDC3C7" }}>50ms</div>
-                <div className="text-[11px] uppercase tracking-widest" style={{ color: "#7F8C8D" }}>latency_max</div>
-              </div>
-              <div className="p-8 border rounded-lg bg-black" style={{ borderColor: "rgba(26, 26, 26, 0.5)" }}>
-                <div className="text-[36px] font-bold mb-2" style={{ color: "#7F8C8D" }}>99.9%</div>
-                <div className="text-[11px] uppercase tracking-widest" style={{ color: "#7F8C8D" }}>uptime_guarantee</div>
-              </div>
-              <div className="p-8 border rounded-lg bg-black" style={{ borderColor: "rgba(26, 26, 26, 0.5)" }}>
-                <div className="text-[36px] font-bold mb-2" style={{ color: "#95A5A6" }}>0.0s</div>
-                <div className="text-[11px] uppercase tracking-widest" style={{ color: "#7F8C8D" }}>setup_duration</div>
-              </div>
-            </div>
-            <button className={`${styles.butnFunc} px-12 py-6 rounded-xl font-bold text-[18px] flex items-center gap-4 mx-auto shadow-2xl`} style={{ background: "#BDC3C7", color: "#000", boxShadow: "0 25px 50px rgba(189, 195, 199, 0.4)" ,fontFamily:"var(--font-jetbrains-mono)" }} onClick={() => signIn("github", { callbackUrl: "/dashboard" })}>
-              develop_now()
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="currentColor">
-                <path d="M392.8 65.2C375.8 60.3 358.1 70.2 353.2 87.2L225.2 535.2C220.3 552.2 230.2 569.9 247.2 574.8C264.2 579.7 281.9 569.8 286.8 552.8L414.8 104.8C419.7 87.8 409.8 70.1 392.8 65.2zM457.4 201.3C444.9 213.8 444.9 234.1 457.4 246.6L530.8 320L457.4 393.4C444.9 405.9 444.9 426.2 457.4 438.7C469.9 451.2 490.2 451.2 502.7 438.7L598.7 342.7C611.2 330.2 611.2 309.9 598.7 297.4L502.7 201.4C490.2 188.9 469.9 188.9 457.4 201.4zM182.7 201.3C170.2 188.8 149.9 188.8 137.4 201.3L41.4 297.3C28.9 309.8 28.9 330.1 41.4 342.6L137.4 438.6C149.9 451.1 170.2 451.1 182.7 438.6C195.2 426.1 195.2 405.8 182.7 393.3L109.3 320L182.6 246.6C195.1 234.1 195.1 213.8 182.6 201.3z" />
-              </svg>
-            </button>
-          </div>
-        </section>
-      </main>
-      <footer className={`border-t py-20 relative z-10 `} style={{ background: "#050505", borderColor: "#1a1a1a" }}>
-        <div className="max-w-[1440px] mx-auto px-10 md:px-20 grid grid-cols-1 lg:grid-cols-12 gap-16">
-          <div className="lg:col-span-5">
-            <span className="font-mono font-bold text-[20px] mb-6 block" style={{ color: "#BDC3C7" }}>collab_ide</span>
-            <p className="leading-relaxed font-light mb-8 max-w-sm" style={{ color: "rgba(127, 140, 141, 0.7)" }}>
-              {`/* Building the future of developer experience. High-frequency tools for distributed engineering
-                    squads. */`}
-            </p>
-            <div className="flex gap-4">
-              <div className={`${styles.socialIcon} w-10 h-10 border flex items-center justify-center rounded  transition-all cursor-pointer `} style={{ borderColor: "#1a1a1a" }}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  shapeRendering="geometricPrecision"
-                  textRendering="geometricPrecision"
-                  imageRendering="optimizeQuality"
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  viewBox="0 0 512 499.368"
-                  width="20"
-                  height="20"
-                >
-                  <path
-                    fill="#fff"
-                    fillRule="nonzero"
-                    d="M256.003 0C114.555 0 0 114.555 0 256.003c0 113.286 73.28 208.961 175.038 242.865 12.796 2.247 17.586-5.433 17.586-12.153 0-6.077-.309-26.225-.309-47.686-64.313 11.844-80.941-15.674-86.058-30.055-2.896-7.37-15.359-30.1-26.269-36.177-8.948-4.808-21.752-16.652-.31-16.961 20.168-.309 34.574 18.564 39.382 26.244 23.038 38.732 59.839 27.828 74.555 21.101 2.227-16.627 8.947-27.828 16.318-34.239-56.968-6.386-116.467-28.471-116.467-126.399 0-27.827 9.907-50.866 26.225-68.787-2.562-6.41-11.51-32.655 2.562-67.853 0 0 21.436-6.72 70.409 26.244 20.483-5.767 42.227-8.638 63.998-8.638 21.751 0 43.52 2.896 63.997 8.638 48.973-33.279 70.39-26.244 70.39-26.244 14.09 35.192 5.117 61.443 2.562 67.853 16.318 17.921 26.244 40.625 26.244 68.787 0 98.237-59.84 119.988-116.801 126.399 9.282 8.014 17.277 23.373 17.277 47.371 0 34.238-.309 61.751-.309 70.389 0 6.721 4.808 14.735 17.586 12.179C438.739 464.964 512 368.955 512 256.003 512 114.555 397.445 0 256.003 0z"
-                  />
-                </svg>
-              </div>
-              <div className={`${styles.socialIcon} w-10 h-10 border flex items-center justify-center rounded  transition-all cursor-pointer `} style={{ borderColor: "#1a1a1a" }}>
-                <svg
-                  width="24px"
-                  height="24px"
-                  viewBox="0 0 24 24"
-                  role="img"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                >
-                  <title>{"LinkedIn icon"}</title>
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          {/* Footer Links */}
-          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-12 font-mono text-[13px]">
-            <div className="flex flex-col gap-5">
-              <span className="font-bold uppercase tracking-widest text-[11px]" style={{ color: "#ECF0F1" }}>Product</span>
-              <a className="transition-colors" style={{ color: "#7F8C8D" }} href="#">documentation</a>
-              <a className="transition-colors" style={{ color: "#7F8C8D" }} href="#">changelog</a>
-              <a className="transition-colors" style={{ color: "#7F8C8D" }} href="#">pricing</a>
-            </div>
-            <div className="flex flex-col gap-5">
-              <span className="font-bold uppercase tracking-widest text-[11px]" style={{ color: "#ECF0F1" }}>Resources</span>
-              <a className="transition-colors" style={{ color: "#7F8C8D" }} href="#">api_reference</a>
-              <a className="transition-colors" style={{ color: "#7F8C8D" }} href="#">status</a>
-              <a className="transition-colors" style={{ color: "#7F8C8D" }} href="#">github_repo</a>
-            </div>
-            <div className="flex flex-col gap-5">
-              <span className="font-bold uppercase tracking-widest text-[11px]" style={{ color: "#ECF0F1" }}>Legal</span>
-              <a className="transition-colors" style={{ color: "#7F8C8D" }} href="#">privacy_policy</a>
-              <a className="transition-colors" style={{ color: "#7F8C8D" }} href="#">terms_of_service</a>
-            </div>
-          </div>
-        </div>
-        {/* Footer Bottom */}
-        <div className="max-w-[1440px] mx-auto px-10 md:px-20 mt-20 pt-10 flex flex-col sm:flex-row justify-between items-center gap-6 font-mono text-[11px]" style={{ borderTop: "1px solid #1a1a1a", color: "rgba(127, 140, 141, 0.4)" }}>
-          <span>{"// © 2026 Collab IDE. compiled: successful."}</span>
-          <span>TECHNICAL_SILVER_SYNTAX_V2.0</span>
-        </div>
-      </footer>
+      <style>{`
+                @keyframes blink0 { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+                @keyframes blink1 { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+                @keyframes blink2 { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+                @keyframes blink3 { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+            `}</style>
     </div>
-  )
+  );
+}
 
+// ============================================================
+// PANEL: FAKE DASHBOARD (Section 2)
+// ============================================================
+
+function FakeDashboard() {
+  return (
+
+    <div style={{
+      width: "820px", background: "#0d0d0d", border: "1px solid #1a1a1a",
+      borderRadius: "10px", overflow: "hidden", fontFamily: "'JetBrains Mono', monospace",
+      boxShadow: "0 0 80px rgba(245,158,11,0.12), 0 30px 60px rgba(0,0,0,0.7)",
+    }}>
+      <div style={{ display: "flex", borderBottom: "1px solid #1a1a1a" }}>
+        {/* sidebar */}
+        <div style={{ width: 160, borderRight: "1px solid #1a1a1a", padding: "16px 12px", fontSize: 11, color: "#7F8C8D" }}>
+          <div style={{ color: "#F59E0B", fontWeight: 700, marginBottom: 16, fontSize: 12 }}>collab_ide</div>
+          <div style={{ color: "#ECF0F1", marginBottom: 8 }}>overview</div>
+          <div style={{ marginBottom: 8 }}>projects <span style={{ float: "right", background: "#1a1a1a", padding: "1px 6px", borderRadius: 4 }}>3</span></div>
+          <div style={{ marginBottom: 24 }}>settings</div>
+          <div style={{ fontSize: 10, color: "#3a3a3a", marginBottom: 6 }}>RECENT</div>
+          <div style={{ marginBottom: 6, color: "#BDC3C7" }}>EcoSphere</div>
+          <div style={{ marginBottom: 6 }}>Folder_check</div>
+        </div>
+        {/* main */}
+        <div style={{ flex: 1, padding: "16px 20px" }}>
+          <div style={{ fontSize: 10, color: "#7F8C8D", marginBottom: 4 }}>// dashboard.init()</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#ECF0F1", marginBottom: 16 }}>hello, kaivalya_dev()</div>
+          {/* stats */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 16 }}>
+            {[
+              { label: "ACTIVE_PROJECTS", value: "2" },
+              { label: "COLLABORATORS", value: "4" },
+              { label: "TOTAL_FILES", value: "12" },
+              { label: "AI_COMPLETIONS", value: "∞" },
+            ].map(s => (
+              <div key={s.label} style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: 6, padding: "10px 12px" }}>
+                <div style={{ fontSize: 9, color: "#F59E0B", marginBottom: 4 }}>● {s.label}</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#ECF0F1" }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+          {/* projects */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
+            {[
+              { name: "EcoSphere", status: "archived", lang: "Typescript" },
+              { name: "Folder_check", status: "active", lang: "Typescript" },
+              { name: "ishika2027", status: "active", lang: "Typescript" },
+            ].map(p => (
+              <div key={p.name} style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: 6, padding: "10px 12px" }}>
+                <div style={{ fontSize: 9, color: p.status === "active" ? "#22C55E" : "#7F8C8D", marginBottom: 6 }}>● {p.status}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#ECF0F1", marginBottom: 4 }}>{p.name}</div>
+                <div style={{ fontSize: 10, color: "#7F8C8D" }}>{p.lang}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  );
+}
+
+// ============================================================
+// PANEL: FAKE Terminal (Section 3)
+// ============================================================
+
+function FakeTerminal() {
+    const lines = [
+        { text: "/tmp/workspace # docker run node:18-alpine", color: "#5fbf77", delay: 0 },
+        { text: "Unable to find image 'node:18-alpine' locally", color: "#7F8C8D", delay: 800 },
+        { text: "18-alpine: Pulling from library/node", color: "#7F8C8D", delay: 1400 },
+        { text: "✓ Pull complete", color: "#22C55E", delay: 2200 },
+        { text: "/tmp/workspace # node filename.ts", color: "#5fbf77", delay: 3000 },
+        { text: "Sum: 30", color: "#ECF0F1", delay: 3800 },
+        { text: "Result: 30", color: "#ECF0F1", delay: 4200 },
+        { text: "/tmp/workspace # _", color: "#5fbf77", delay: 5000 },
+    ];
+
+    const [visibleLines, setVisibleLines] = useState(0);
+
+    useEffect(() => {
+        setVisibleLines(0);
+        const timeouts = lines.map((_, i) =>
+            setTimeout(() => setVisibleLines(i + 1), lines[i].delay)
+        );
+        return () => timeouts.forEach(clearTimeout);
+    }, []);
+
+    return (
+        <div style={{
+            width: "680px", background: "#000",
+            border: "1px solid #1a1a1a", borderRadius: "10px",
+            overflow: "hidden", fontFamily: "'JetBrains Mono', monospace",
+            boxShadow: "0 0 80px rgba(34,197,94,0.1), 0 30px 60px rgba(0,0,0,0.7)",
+        }}>
+            {/* title bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderBottom: "1px solid #1a1a1a", background: "#0a0a0a" }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
+                <span style={{ marginLeft: 12, fontSize: 11, color: "#7F8C8D" }}>terminal — /tmp/workspace</span>
+                <span style={{ marginLeft: "auto", fontSize: 10, color: "#22C55E", display: "flex", alignItems: "center", gap: 5 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 6px #22C55E" }} />
+                    docker · node:18-alpine
+                </span>
+            </div>
+
+            {/* terminal output */}
+            <div style={{ padding: "16px", minHeight: 260 }}>
+                {lines.slice(0, visibleLines).map((line, i) => (
+                    <div key={i} style={{
+                        fontSize: 12, color: line.color,
+                        lineHeight: 1.8, whiteSpace: "pre",
+                    }}>
+                        {line.text}
+                        {/* blinking cursor on last visible line */}
+                        {i === visibleLines - 1 && i === lines.length - 1 && (
+                            <span style={{
+                                display: "inline-block", width: 8, height: 13,
+                                background: "#5fbf77", marginLeft: 2,
+                                verticalAlign: "middle",
+                                animation: "cursorBlink 0.8s steps(2) infinite",
+                            }} />
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ============================================================
+// PANEL: CTA (Section 4)
+// ============================================================
+
+function FakeCTA() {
+  return (
+    <div style={{
+      width: "580px", textAlign: "center", fontFamily: "'JetBrains Mono', monospace",
+      display: "flex", flexDirection: "column", alignItems: "center", gap: 20,
+    }}>
+      <div style={{ fontSize: 11, color: "#F59E0B" }}>// workspace.ready()</div>
+      <div style={{ fontSize: "clamp(2rem,4vw,3.2rem)", fontWeight: 800, color: "#ECF0F1", lineHeight: 1.1 }}>
+        Ready to ship<br /><span style={{ color: "#F59E0B" }}>from the cloud?</span>
+      </div>
+      <div style={{ fontSize: 13, color: "#7F8C8D", maxWidth: 400, lineHeight: 1.7 }}>
+        No setup. No local installs. Just open a tab and start collaborating.
+      </div>
+      <a href="https://collab-ide-nine.vercel.app" target="_blank" rel="noreferrer" style={{
+        background: "#F59E0B", color: "#1a1206", fontFamily: "'JetBrains Mono', monospace",
+        fontWeight: 700, fontSize: 14, padding: "14px 32px", borderRadius: 8,
+        border: "none", cursor: "pointer", textDecoration: "none",
+        boxShadow: "0 0 40px rgba(245,158,11,0.4)",
+      }}>
+        launch_ide() →
+      </a>
+      <div style={{ fontSize: 10, color: "#3a3a3a" }}>
+        collab-ide-nine.vercel.app
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// WORKSPACE SCENE — switches panel based on activeSection
+// ============================================================
+
+function WorkspaceScene({ activeSection }: { activeSection: number }) {
+  const wobbleRef = useRef<THREE.Group>(null!);
+
+  const [panelVisible, setPanelVisible] = useState(true);
+  const prevSection = useRef(activeSection);
+
+  useEffect(() => {
+    if (prevSection.current === activeSection) return;
+    // fade out, swap, fade in
+    setPanelVisible(false);
+    const timer = setTimeout(() => {
+      prevSection.current = activeSection;
+      setPanelVisible(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [activeSection]);
+
+  useGSAP(() => {
+    gsap.to(wobbleRef.current.rotation, {
+      y: 0.3, x: 0.1, ease: "none",
+      scrollTrigger: {
+        trigger: "#workspace-wrapper",
+        start: "top top", end: "bottom bottom", scrub: true,
+      },
+    });
+  }, []);
+
+
+  const panel = () => {
+    if (activeSection === 1) return <FakeEditor />;
+    if (activeSection === 2) return <FakeDashboard />;
+    if (activeSection === 3) return <FakeTerminal />;
+    if (activeSection === 4) return <FakeCTA />;
+    // default
+  };
+
+  const panelShift: Record<number, string> = {
+    1: "translateX(180px)",  // text left → panel shifts right
+    2: "translateX(-180px)", // text right → panel shifts left
+    3: "translateX(180px)",  // text left → panel shifts right
+    4: "translateX(0px)",    // centered
+  };
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const tiltRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = tiltRef.current;
+    if (!el) return;
+
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left && e.clientX <= rect.right &&
+        e.clientY >= rect.top && e.clientY <= rect.bottom;
+
+      if (inside) {
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        el.style.transform = `perspective(1000px) rotateY(${x * 12}deg) rotateX(${-y * 8}deg) scale(1.02)`;
+      } else {
+        el.style.transform = `perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1)`;
+      }
+    };
+
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [panelVisible]);
+  return (
+    <group ref={wobbleRef}>
+      <Html center>
+        <div
+          ref={wrapperRef}
+          style={{
+            opacity: panelVisible ? 1 : 0,
+            transform: panelShift[activeSection] || "translateX(0px)",
+            transition: "opacity 0.3s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1)",
+            pointerEvents: "auto",
+          }}
+        >
+          <div
+            ref={tiltRef}
+            style={{ transition: "transform 0.15s ease", willChange: "transform" }}
+          >
+            {panel()}
+          </div>
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+function Atmosphere() {
+  return (
+    <>
+      <Sparkles count={70} scale={[14, 8, 6]} size={2.5} speed={0.25} color="#F59E0B" opacity={0.5} />
+      <Grid
+        position={[0, -2.4, 0]} args={[20, 20]}
+        cellColor="#1a1a1a" sectionColor="#D97706"
+        sectionThickness={0.6} cellThickness={0.3}
+        fadeDistance={18} fadeStrength={1} infiniteGrid
+      />
+    </>
+  );
+}
+
+function CameraRig() {
+  const { camera } = useThree();
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#workspace-wrapper",
+        start: "top top", end: "bottom bottom",
+        scrub: true, onUpdate: () => camera.lookAt(0, 0, 0),
+      },
+    });
+    tl.to(camera.position, { z: 4, x: -0.5, y: 0.2 })
+      .to(camera.position, { z: 2.2, x: 0, y: 0 })
+      .to(camera.position, { z: 1.4, x: 0.3, y: 0.1 })
+      .to(camera.position, { z: 1.8, x: -0.4, y: 0.4 })
+      .to(camera.position, { z: 4.5, x: -1, y: 1 })
+      .to(camera.position, { z: 8, x: 1.5, y: 2 })
+      .to(camera.position, { z: 5, x: 0, y: 0 });
+  }, [camera]);
+  return null;
+}
+
+// ============================================================
+// SCROLL SECTION WRAPPER
+// ============================================================
+
+function ScrollSection({ heightVh, children }: { heightVh: number; children: React.ReactNode }) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top top", end: "+=90%", scrub: true,
+      },
+    });
+    tl.to(contentRef.current, { opacity: 1, duration: 1 })
+      .to(contentRef.current, { opacity: 1, duration: 0.3 })
+      .to(contentRef.current, { opacity: 0, duration: 3 });
+  }, []);
+
+  return (
+    <div ref={sectionRef} style={{ height: `${heightVh}vh`, position: "relative" }}>
+      <div ref={contentRef} style={{ position: "fixed", inset: 0, opacity: 0 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Section text overlays — left side narrative text per section
+function Section1Text() {
+  return (
+    <ScrollSection heightVh={150}>
+      <div style={{ position: "absolute", left: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 340 }}>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>// feature_01</div>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(2rem,4vw,4rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
+          Real-time<br />multiplayer editing
+        </h2>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#a4b4b5", lineHeight: 1.8 }}>
+          Multiple developers editing the same file simultaneously — powered by Yjs CRDTs with colored cursors per user.
+        </p>
+      </div>
+    </ScrollSection>
+  );
+}
+
+function Section2Text() {
+  return (
+    <ScrollSection heightVh={150}>
+      <div style={{ position: "absolute", right: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 340, textAlign: "right" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>// feature_02</div>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(2rem,4vw,2.8rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
+          Project dashboard<br />& collaboration
+        </h2>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#7F8C8D", lineHeight: 1.8 }}>
+          Manage projects, invite collaborators, track files and leave threaded comments — all in one place.
+        </p>
+      </div>
+    </ScrollSection>
+  );
+}
+
+function Section3Text() {
+  return (
+    <ScrollSection heightVh={150}>
+      <div style={{ position: "absolute", left: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 440 }}>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>// feature_03</div>
+        <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(1.8rem,4vw,2.8rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
+          Sandboxed terminal & Docker execution
+        </h2>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#7F8C8D", lineHeight: 1.8 }}>
+          Run code in isolated Docker containers directly from the browser. No local setup required.
+        </p>
+      </div>
+    </ScrollSection>
+  );
+}
+
+function Section4Text() {
+  return (
+    <ScrollSection heightVh={150}>
+      <div style={{ position: "absolute", right: 530, top: "80%", transform: "translateY(-50%)", maxWidth: 340, textAlign: "center" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>// initialize your First Project</div>
+      </div>
+    </ScrollSection>
+  );
+}
+
+// ============================================================
+// BLACK FADE OVERLAY
+// ============================================================
+
+function BlackFadeOverlay({ totalSections }: { totalSections: number }) {
+  const overlayRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = overlayRef.current;
+    if (!el) return;
+    function update() {
+      const vh = window.innerHeight;
+      const sectionIndex = window.scrollY / vh;
+      const nearestBoundary = Math.round(sectionIndex);
+      if (nearestBoundary <= 0 || nearestBoundary >= totalSections) { el!.style.opacity = "0"; return; }
+      const distance = Math.abs(sectionIndex - nearestBoundary);
+      const fadeWindow = 0.1;
+      el!.style.opacity = String(Math.max(0, 1 - distance / fadeWindow));
+    }
+    window.addEventListener("scroll", () => requestAnimationFrame(update));
+    update();
+    return () => window.removeEventListener("scroll", update);
+  }, [totalSections]);
+  return (
+    <div ref={overlayRef} style={{ position: "fixed", inset: 0, background: "#000", opacity: 0, pointerEvents: "none", zIndex: 9999 }} />
+  );
+}
+
+// ============================================================
+// HUD — receives activeSection as prop
+// ============================================================
+
+const HUD_CONFIG = [
+  { status: "INITIALIZING", users: "–", latency: "–ms" },
+  { status: "MULTIPLAYER_SYNC", users: "4", latency: "12ms" },
+  { status: "WORKSPACE_MATRIX", users: "4", latency: "8ms" },
+  { status: "SANDBOX_ACTIVE", users: "4", latency: "3ms" },
+  { status: "DEPLOYING", users: "4", latency: "1ms" },
+];
+
+function HUD({ activeSection, visible }: { activeSection: number; visible: boolean }) {
+  return (
+    <div style={{
+      position: "fixed", top: 90, left: 30,
+      fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+      color: "#F5A623", lineHeight: 1.8, pointerEvents: "none",
+      zIndex: 999, opacity: visible ? 0.75 : 0,
+      transition: "opacity 0.6s ease",
+    }}>
+      <div>// {HUD_CONFIG[activeSection].status}</div>
+      <div>// USERS: {HUD_CONFIG[activeSection].users}</div>
+      <div>// LATENCY: {HUD_CONFIG[activeSection].latency}</div>
+    </div>
+  );
+}
+
+
+// ============================================================
+// FOOTER
+// ============================================================
+
+function FooterLink({ label, href }: { label: string; href: string }) {
+  const linkRef = useRef<HTMLAnchorElement>(null);
+
+  return (
+    <a
+      ref={linkRef}
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      onMouseEnter={() => {
+        if (!linkRef.current) return;
+        linkRef.current.style.color = "#F59E0B";
+        linkRef.current.style.paddingLeft = "20px";
+      }}
+      onMouseLeave={() => {
+        if (!linkRef.current) return;
+        linkRef.current.style.color = "#BDC3C7";
+        linkRef.current.style.paddingLeft = "0px";
+      }}
+      style={{
+        display: "block",
+        position: "relative",
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: 12,
+        color: "#BDC3C7",
+        textDecoration: "none",
+        marginBottom: 10,
+        paddingLeft: 0,
+        transition: "color 0.2s, padding-left 0.2s",
+      }}
+    >
+      <span
+        className="footer-prefix"
+        style={{
+          position: "absolute", left: 0, top: 0,
+          color: "#F59E0B", fontSize: 12,
+          fontWeight: 700, opacity: 0,
+          transition: "opacity 0.2s",
+        }}
+      >
+                //
+      </span>
+      {label}
+    </a>
+  );
+}
+
+
+function Footer() {
+  const footerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    gsap.fromTo(contentRef.current,
+      { opacity: 0, y: 30 },
+      {
+        opacity: 1, y: 0, duration: 1, ease: "power3.out",
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+  }, []);
+
+  const cols = [
+    {
+      heading: "// about",
+      items: [
+        { label: "collab_ide", href: "https://collab-ide-nine.vercel.app" },
+        { label: "built_by kaivalya", href: "https://github.com/Kaivalyakulkarni" },
+        { label: "full_stack_ide", href: "#" },
+      ]
+    },
+    {
+      heading: "// links",
+      items: [
+        { label: "live_demo()", href: "https://collab-ide-nine.vercel.app" },
+        { label: "github_repo", href: "https://github.com/Kaivalyakulkarni/collab-Ide" },
+        { label: "open_in_ide()", href: "https://collab-ide-nine.vercel.app" },
+      ]
+    },
+    {
+      heading: "// stack",
+      items: [
+        { label: "Next.js + TypeScript", href: "#" },
+        { label: "Yjs CRDTs", href: "#" },
+        { label: "Docker + node-pty", href: "#" },
+        { label: "Groq AI (llama-3.3)", href: "#" },
+      ]
+    },
+  ];
+
+  return (
+    <div ref={footerRef} id="footer-wrapper" style={{ position: "relative", width: "100%", height: "100vh", overflow: "hidden" }}>
+
+      {/* Shader Gradient */}
+      <ShaderGradientCanvas style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+        <ShaderGradient
+          animate="on"
+          brightness={0.85}
+          cAzimuthAngle={180}
+          cDistance={2.8}
+          cPolarAngle={52}
+          cameraZoom={1}
+          color1="#050505"
+          color2="#F59E0B"
+          color3="#4F46E5"
+          envPreset="city"
+          grain="on"
+          lightType="env"
+          positionX={0}
+          positionY={0.2}
+          positionZ={0}
+          reflection={0.1}
+          rotationX={-40}
+          rotationY={0}
+          rotationZ={0}
+          shader="defaults"
+          type="waterPlane"
+          uAmplitude={5}
+          uDensity={1.2}
+          uFrequency={2.5}
+          uSpeed={0.25}
+          uStrength={2.5}
+          wireframe={false}
+        />
+      </ShaderGradientCanvas>
+
+      {/* dark overlay */}
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 1,
+        background: "linear-gradient(to bottom, rgba(5,5,5,0.75) 0%, rgba(5,5,5,0.5) 50%, rgba(5,5,5,0.85) 100%)",
+      }} />
+
+      {/* watermark */}
+      <div style={{
+        position: "absolute", top: "50%", left: "50%",
+        transform: "translate(-50%, -50%)",
+        fontFamily: "'Inter', sans-serif", fontWeight: 900,
+        fontSize: "clamp(5rem, 14vw, 12rem)",
+        color: "rgba(245,158,11,0.04)",
+        whiteSpace: "nowrap", userSelect: "none", zIndex: 2,
+        letterSpacing: "-0.04em",
+      }}>
+        collab_ide
+      </div>
+
+      {/* content */}
+      <div ref={contentRef} style={{
+        position: "absolute", inset: 0, zIndex: 3,
+        display: "flex", flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "60px 48px 0 48px",
+        opacity: 0,
+      }}>
+        {/* logo + tagline */}
+        <div>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontWeight: 700, fontSize: "1.1rem",
+            color: "#F59E0B", marginBottom: 8,
+          }}>
+            collab<span style={{ opacity: 0.5 }}>_</span>ide
+          </div>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "0.78rem", color: "#7F8C8D",
+            maxWidth: 400, lineHeight: 1.7,
+          }}>
+            {"// a full-stack browser IDE — real-time multiplayer,"}
+            <br />
+            {"// sandboxed execution, AI completions, git. no setup."}
+          </div>
+        </div>
+
+        {/* columns */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 40, maxWidth: 720 }}>
+          {cols.map((col, ci) => (
+            <div key={ci}>
+              <div style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10, color: "#F59E0B",
+                marginBottom: 16, letterSpacing: "0.05em",
+              }}>
+                {col.heading}
+              </div>
+              {col.items.map((item, ii) => (
+                <FooterLink key={ii} label={item.label} href={item.href} />
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* status bar */}
+        <div style={{
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          padding: "14px 0",
+          display: "flex", alignItems: "center", gap: 24,
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 11, color: "#7F8C8D",
+        }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 6px #22C55E" }} />
+            connected
+          </span>
+          <span style={{ color: "#3a3a3a" }}>•</span>
+          <span>main</span>
+          <span style={{ color: "#3a3a3a" }}>•</span>
+          <span>TypeScript</span>
+          <span style={{ color: "#3a3a3a" }}>•</span>
+          <span style={{ marginLeft: "auto", color: "#F59E0B" }}>COLLAB_IDE_V1.0</span>
+        </div>
+      </div>
+      <style>{`
+    a:hover .footer-prefix { opacity: 1 !important; }
+`}</style>
+    </div>
+  );
+}
+
+
+
+// ============================================================
+// PAGE — activeSection lives here, passed down to HUD + WorkspaceScene
+// ============================================================
+
+export default function Page() {
+  const TOTAL_SECTIONS = 9;
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
+
+  // ← lifted state
+  const [activeSection, setActiveSection] = useState(0);
+  const [hudVisible, setHudVisible] = useState(false);
+
+
+  useGSAP(() => {
+    gsap.fromTo(canvasWrapperRef.current, { opacity: 0 }, {
+      opacity: 1, scale: 1, ease: "none",
+      scrollTrigger: {
+        trigger: "#hero-wrapper", start: "top top", end: "bottom top", scrub: true,
+      },
+    });
+
+    // HUD visibility
+    ScrollTrigger.create({
+      trigger: "#workspace-wrapper",
+      start: "top center",
+      onEnter: () => setHudVisible(true),
+      onLeaveBack: () => setHudVisible(false),
+    });
+
+    ScrollTrigger.create({
+      trigger: "#footer-wrapper",
+      start: "top center",
+      onEnter: () => setHudVisible(false),
+      onLeaveBack: () => setHudVisible(true),
+    });
+
+    // Navbar hide on footer
+    ScrollTrigger.create({
+      trigger: "#footer-wrapper",
+      start: "top bottom",
+      onEnter: () => {
+        const nav = document.querySelector(".hero-nav") as HTMLElement | null;
+        if (!nav) return;
+        nav.style.opacity = "0";
+        nav.style.pointerEvents = "none";
+      },
+      onLeaveBack: () => {
+        const nav = document.querySelector(".hero-nav") as HTMLElement | null;
+        if (!nav) return;
+        nav.style.opacity = "1";
+        nav.style.pointerEvents = "auto";
+      },
+    });
+
+    // Section detection
+    ScrollTrigger.create({
+      trigger: "#section-1", start: "top center", end: "bottom center",
+      onEnter: () => setActiveSection(1), onEnterBack: () => setActiveSection(1),
+    });
+    ScrollTrigger.create({
+      trigger: "#section-2", start: "top center", end: "bottom center",
+      onEnter: () => setActiveSection(2), onEnterBack: () => setActiveSection(2),
+    });
+    ScrollTrigger.create({
+      trigger: "#section-3", start: "top center", end: "bottom center",
+      onEnter: () => setActiveSection(3), onEnterBack: () => setActiveSection(3),
+    });
+    ScrollTrigger.create({
+      trigger: "#section-4", start: "top center", end: "bottom center",
+      onEnter: () => setActiveSection(4), onEnterBack: () => setActiveSection(4),
+    });
+  }, []);
+
+  return (
+    <div style={{ position: "relative" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+
+      <HeroSection />
+
+      <div id="stack-section" style={{
+        marginTop: 100,
+        background: "#05050511",
+        borderTop: "1px solid #1a1a1a",
+        borderBottom: "1px solid #1a1a1a",
+        padding: "18px 0",
+      }}>
+        <Marquee />
+        <div style={{ marginTop: 40 }}>
+          <Marquee isReversed />
+        </div>
+      </div>
+
+      <div id="workspace-wrapper" style={{ position: "relative" }}>
+        <div style={{ position: "sticky", top: 0, height: "100vh", zIndex: 0, overflow: "hidden" }}>
+          <div ref={canvasWrapperRef} style={{ width: "100%", height: "100%" }}>
+            <Canvas camera={{ position: [0, 0, 6], fov: 50 }}>
+              <ambientLight intensity={0.4} color="#3a3a4a" />
+              <pointLight position={[3, 2, 4]} intensity={25} color="#F59E0B" />
+              <pointLight position={[-4, -2, -2]} intensity={10} color="#6366F1" />
+              <CameraRig />
+              <WorkspaceScene activeSection={activeSection} />
+              <Atmosphere />
+              <EffectComposer>
+                <Bloom intensity={0.6} luminanceThreshold={0.2} luminanceSmoothing={0.9} mipmapBlur />
+              </EffectComposer>
+            </Canvas>
+          </div>
+        </div>
+
+        <div id="section-1"><Section1Text /></div>
+        <div id="section-2"><Section2Text /></div>
+        <div id="section-3"><Section3Text /></div>
+        <div id="section-4"><Section4Text /></div>
+        <div style={{ height: "100vh" }} />
+      </div>
+
+      <Footer />
+
+      <HUD activeSection={activeSection} visible={hudVisible} />
+      <BlackFadeOverlay totalSections={TOTAL_SECTIONS} />
+    </div>
+  );
 }

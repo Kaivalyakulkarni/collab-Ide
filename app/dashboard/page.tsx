@@ -128,7 +128,7 @@ export default function Dashboard() {
                     {/* Logo + tabs */}
                     <div style={{ display: "flex", alignItems: "center", gap: "24px", height: "100%" }}>
                         {/* Logo */}
-                        <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: ".9rem", fontWeight: "bold", color: "#BDC3C7", cursor: "pointer" }} onClick={() => router.push("/dashboard")}>
+                        <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "var(--font-jetbrains-mono), monospace", fontSize: ".9rem", fontWeight: "bold", color: "#BDC3C7", cursor: "pointer" }} onClick={() => router.push("/")}>
                             {/* Logo */}
                             <svg
                                 fill="#ffffff"
