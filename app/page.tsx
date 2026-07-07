@@ -21,6 +21,23 @@ import { IconType } from "react-icons";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+// ============================================================
+// RESPONSIVE HOOK
+// ============================================================
+
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < breakpoint);
+    check(); // run once on mount — client only, avoids SSR "window is not defined"
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 
 function HeroTypewriter() {
   const full = "A full-stack IDE that runs in the browser — real-time multiplayer editing, a sandboxed terminal, AI completions, and git, all in one tab.";
@@ -383,6 +400,18 @@ function HeroSection() {
           animation: scrolldown 1.8s ease-in-out infinite;
         }
         @keyframes scrolldown { 0%{transform:translateY(-100%);} 100%{transform:translateY(250%);} }
+
+        /* ---- Mobile responsiveness ---- */
+        @media (max-width: 768px) {
+          .hero-navlinks { display: none; }
+          .hero-nav { padding: 12px 18px; }
+          .hero-nav.scrolled { width: 92%; padding: 12px 18px; }
+          .hero-inner { padding: 0 20px; }
+          .hero-sub { font-size: 0.92rem; margin-top: 1.2rem; }
+          .hero-ctas { margin-top: 1.8rem; }
+          .hero-btn-primary, .hero-btn-secondary { padding: 12px 20px; font-size: 0.82rem; }
+          .hero-scroll-cue { display: none; }
+        }
       `}</style>
       <div className="hero-wrap" id="hero-wrapper" ref={heroRef}>
         <div id="cursor-dot" ref={cursorDotRef}></div>
@@ -1017,17 +1046,51 @@ function ScrollSection({ heightVh, children }: { heightVh: number; children: Rea
   );
 }
 
-// Section text overlays — left side narrative text per section
+// ============================================================
+// SECTION COPY — single source of truth, read by both the desktop
+// scroll overlays (Section*Text) and MobileWorkspace, so copy only
+// ever lives in one place.
+// ============================================================
+
+const SECTIONS: {
+  label: string;
+  heading: React.ReactNode;
+  description: string;
+}[] = [
+  {
+    label: "// feature_01",
+    heading: <>Real-time<br />multiplayer editing</>,
+    description: "Multiple developers editing the same file simultaneously — powered by Yjs CRDTs with colored cursors per user.",
+  },
+  {
+    label: "// feature_02",
+    heading: <>Project dashboard<br />& collaboration</>,
+    description: "Manage projects, invite collaborators, track files and leave threaded comments — all in one place.",
+  },
+  {
+    label: "// feature_03",
+    heading: "Sandboxed terminal & Docker execution",
+    description: "Run code in isolated Docker containers directly from the browser. No local setup required.",
+  },
+  {
+    label: "// initialize your First Project",
+    heading: <>Ready to ship<br /><span style={{ color: "#F59E0B" }}>from the cloud?</span></>,
+    description: "No setup. No local installs. Just open a tab and start collaborating.",
+  },
+];
+
+// Section text overlays — left/right side narrative text per section
 function Section1Text() {
+  const s = SECTIONS[0];
   return (
     <ScrollSection heightVh={150}>
       <div style={{ position: "absolute", left: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 340 }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>// feature_01</div>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
         <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(2rem,4vw,4rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
-          Real-time<br />multiplayer editing
+          {s.heading}
         </h2>
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#a4b4b5", lineHeight: 1.8 }}>
-          Multiple developers editing the same file simultaneously — powered by Yjs CRDTs with colored cursors per user.
+          {s.description}
         </p>
       </div>
     </ScrollSection>
@@ -1035,15 +1098,16 @@ function Section1Text() {
 }
 
 function Section2Text() {
+  const s = SECTIONS[1];
   return (
     <ScrollSection heightVh={150}>
       <div style={{ position: "absolute", right: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 340, textAlign: "right" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>// feature_02</div>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
         <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(2rem,4vw,2.8rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
-          Project dashboard<br />& collaboration
+          {s.heading}
         </h2>
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#7F8C8D", lineHeight: 1.8 }}>
-          Manage projects, invite collaborators, track files and leave threaded comments — all in one place.
+          {s.description}
         </p>
       </div>
     </ScrollSection>
@@ -1051,15 +1115,16 @@ function Section2Text() {
 }
 
 function Section3Text() {
+  const s = SECTIONS[2];
   return (
     <ScrollSection heightVh={150}>
       <div style={{ position: "absolute", left: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 440 }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>// feature_03</div>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
         <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(1.8rem,4vw,2.8rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
-          Sandboxed terminal & Docker execution
+          {s.heading}
         </h2>
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#7F8C8D", lineHeight: 1.8 }}>
-          Run code in isolated Docker containers directly from the browser. No local setup required.
+          {s.description}
         </p>
       </div>
     </ScrollSection>
@@ -1067,12 +1132,145 @@ function Section3Text() {
 }
 
 function Section4Text() {
+  const s = SECTIONS[3];
   return (
     <ScrollSection heightVh={150}>
       <div style={{ position: "absolute", right: 530, top: "80%", transform: "translateY(-50%)", maxWidth: 340, textAlign: "center" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>// initialize your First Project</div>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
       </div>
     </ScrollSection>
+  );
+}
+
+// ============================================================
+// MOBILE — static panels (no typing animation, no fixed pixel widths)
+// ============================================================
+
+function MobileEditorPanel() {
+  const lines = [
+    { text: "const session = await collab.join(roomId);", user: "Kaivalya", color: "#F59E0B" },
+    { text: "session.onCursorMove((user, pos) => {", user: "Sarah", color: "#A855F7" },
+    { text: "  renderCursor(user.color, pos);", user: "Ishu", color: "#22C55E" },
+    { text: "});", user: "Rohan", color: "#3B82F6" },
+  ];
+  return (
+    <div style={{
+      width: "100%", background: "#0d0d0d", border: "1px solid #1a1a1a",
+      borderRadius: 10, overflow: "hidden", fontFamily: "'JetBrains Mono', monospace",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderBottom: "1px solid #1a1a1a", background: "#111" }}>
+        <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 9, height: 9, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 10, fontSize: 10, color: "#7F8C8D" }}>collab-ide · filename.ts</span>
+      </div>
+      <div style={{ padding: "12px 0" }}>
+        {lines.map((l, i) => (
+          <div key={i} style={{ display: "flex", padding: "3px 14px", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ width: 18, color: "rgba(127,140,141,0.3)", fontSize: 10, flexShrink: 0 }}>{i + 1}</span>
+            <span style={{
+              fontSize: 9, fontWeight: 700, color: "#fff", background: l.color,
+              padding: "1px 6px", borderRadius: 3, flexShrink: 0,
+            }}>{l.user}</span>
+            <span style={{ fontSize: 11, color: "#ECF0F1", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{l.text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MobileDashboardPanel() {
+  const stats = [
+    { label: "PROJECTS", value: "2" },
+    { label: "COLLABORATORS", value: "4" },
+    { label: "FILES", value: "12" },
+    { label: "AI_COMPLETIONS", value: "∞" },
+  ];
+  return (
+    <div style={{
+      width: "100%", background: "#0d0d0d", border: "1px solid #1a1a1a",
+      borderRadius: 10, padding: 16, fontFamily: "'JetBrains Mono', monospace",
+    }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "#ECF0F1", marginBottom: 12 }}>hello, kaivalya_dev()</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 8 }}>
+        {stats.map(s => (
+          <div key={s.label} style={{ background: "#111", border: "1px solid #1a1a1a", borderRadius: 6, padding: "8px 10px" }}>
+            <div style={{ fontSize: 8, color: "#F59E0B", marginBottom: 4 }}>● {s.label}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#ECF0F1" }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MobileTerminalPanel() {
+  const lines = [
+    "/tmp/workspace # docker run node:18-alpine",
+    "✓ Pull complete",
+    "/tmp/workspace # node filename.ts",
+    "Result: 30",
+    "/tmp/workspace # _",
+  ];
+  return (
+    <div style={{
+      width: "100%", background: "#000", border: "1px solid #1a1a1a",
+      borderRadius: 10, padding: 14, fontFamily: "'JetBrains Mono', monospace",
+    }}>
+      {lines.map((l, i) => (
+        <div key={i} style={{ fontSize: 11, color: i % 2 === 0 ? "#5fbf77" : "#ECF0F1", lineHeight: 1.8, wordBreak: "break-all" }}>
+          {l}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MobileCTAPanel() {
+  return (
+    <a href="https://collab-ide-nine.vercel.app" target="_blank" rel="noreferrer" style={{
+      display: "block", width: "100%", textAlign: "center",
+      background: "#F59E0B", color: "#1a1206", fontFamily: "'JetBrains Mono', monospace",
+      fontWeight: 700, fontSize: 14, padding: "14px 0", borderRadius: 8,
+      textDecoration: "none",
+    }}>
+      launch_ide() →
+    </a>
+  );
+}
+
+const MOBILE_PANELS = [MobileEditorPanel, MobileDashboardPanel, MobileTerminalPanel, MobileCTAPanel];
+
+// ============================================================
+// MOBILE WORKSPACE — static vertical card stack, replaces the
+// sticky-Canvas + scroll-triggered sections on screens < 768px
+// ============================================================
+
+function MobileWorkspace() {
+  return (
+    <div style={{ padding: "60px 20px", display: "flex", flexDirection: "column", gap: 56 }}>
+      {SECTIONS.map((s, i) => {
+        const Panel = MOBILE_PANELS[i];
+        return (
+          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B" }}>
+              {s.label}
+            </div>
+            <h2 style={{
+              fontFamily: "'Inter', sans-serif", fontWeight: 800,
+              fontSize: "clamp(1.7rem, 7vw, 2.3rem)", color: "#ECF0F1", lineHeight: 1.15,
+            }}>
+              {s.heading}
+            </h2>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#7F8C8D", lineHeight: 1.7 }}>
+              {s.description}
+            </p>
+            <Panel />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -1231,7 +1429,7 @@ function Footer() {
   ];
 
   return (
-    <div ref={footerRef} id="footer-wrapper" style={{ position: "relative", width: "100%", height: "100vh", overflow: "hidden" }}>
+    <div ref={footerRef} id="footer-wrapper" style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden" }}>
 
       {/* Shader Gradient */}
       <ShaderGradientCanvas style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
@@ -1286,7 +1484,7 @@ function Footer() {
       </div>
 
       {/* content */}
-      <div ref={contentRef} style={{
+      <div ref={contentRef} className="footer-content" style={{
         position: "absolute", inset: 0, zIndex: 3,
         display: "flex", flexDirection: "column",
         justifyContent: "space-between",
@@ -1314,7 +1512,7 @@ function Footer() {
         </div>
 
         {/* columns */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 40, maxWidth: 720 }}>
+        <div className="footer-cols" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 40, maxWidth: 720 }}>
           {cols.map((col, ci) => (
             <div key={ci}>
               <div style={{
@@ -1338,6 +1536,7 @@ function Footer() {
           display: "flex", alignItems: "center", gap: 24,
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 11, color: "#7F8C8D",
+          flexWrap: "wrap",
         }}>
           <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 6px #22C55E" }} />
@@ -1352,8 +1551,13 @@ function Footer() {
         </div>
       </div>
       <style>{`
-    a:hover .footer-prefix { opacity: 1 !important; }
-`}</style>
+        a:hover .footer-prefix { opacity: 1 !important; }
+
+        @media (max-width: 768px) {
+          .footer-content { padding: 40px 20px 0 20px !important; gap: 24px; }
+          .footer-cols { grid-template-columns: 1fr !important; gap: 24px !important; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -1367,6 +1571,7 @@ function Footer() {
 export default function Page() {
   const TOTAL_SECTIONS = 9;
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   // ← lifted state
   const [activeSection, setActiveSection] = useState(0);
@@ -1374,6 +1579,11 @@ export default function Page() {
 
 
   useGSAP(() => {
+    // On mobile the Canvas/workspace-wrapper/section markers never render,
+    // so none of this scroll-trigger wiring has anything to attach to —
+    // skip it entirely rather than let GSAP warn on missing triggers.
+    if (isMobile) return;
+
     gsap.fromTo(canvasWrapperRef.current, { opacity: 0 }, {
       opacity: 1, scale: 1, ease: "none",
       scrollTrigger: {
@@ -1431,7 +1641,7 @@ export default function Page() {
       trigger: "#section-4", start: "top center", end: "bottom center",
       onEnter: () => setActiveSection(4), onEnterBack: () => setActiveSection(4),
     });
-  }, []);
+  }, [isMobile]);
 
   return (
     <div style={{ position: "relative" }}>
@@ -1452,34 +1662,38 @@ export default function Page() {
         </div>
       </div>
 
-      <div id="workspace-wrapper" style={{ position: "relative" }}>
-        <div style={{ position: "sticky", top: 0, height: "100vh", zIndex: 0, overflow: "hidden" }}>
-          <div ref={canvasWrapperRef} style={{ width: "100%", height: "100%" }}>
-            <Canvas camera={{ position: [0, 0, 6], fov: 50 }}>
-              <ambientLight intensity={0.4} color="#3a3a4a" />
-              <pointLight position={[3, 2, 4]} intensity={25} color="#F59E0B" />
-              <pointLight position={[-4, -2, -2]} intensity={10} color="#6366F1" />
-              <CameraRig />
-              <WorkspaceScene activeSection={activeSection} />
-              <Atmosphere />
-              <EffectComposer>
-                <Bloom intensity={0.6} luminanceThreshold={0.2} luminanceSmoothing={0.9} mipmapBlur />
-              </EffectComposer>
-            </Canvas>
+      {isMobile ? (
+        <MobileWorkspace />
+      ) : (
+        <div id="workspace-wrapper" style={{ position: "relative" }}>
+          <div style={{ position: "sticky", top: 0, height: "100vh", zIndex: 0, overflow: "hidden" }}>
+            <div ref={canvasWrapperRef} style={{ width: "100%", height: "100%" }}>
+              <Canvas camera={{ position: [0, 0, 6], fov: 50 }}>
+                <ambientLight intensity={0.4} color="#3a3a4a" />
+                <pointLight position={[3, 2, 4]} intensity={25} color="#F59E0B" />
+                <pointLight position={[-4, -2, -2]} intensity={10} color="#6366F1" />
+                <CameraRig />
+                <WorkspaceScene activeSection={activeSection} />
+                <Atmosphere />
+                <EffectComposer>
+                  <Bloom intensity={0.6} luminanceThreshold={0.2} luminanceSmoothing={0.9} mipmapBlur />
+                </EffectComposer>
+              </Canvas>
+            </div>
           </div>
-        </div>
 
-        <div id="section-1"><Section1Text /></div>
-        <div id="section-2"><Section2Text /></div>
-        <div id="section-3"><Section3Text /></div>
-        <div id="section-4"><Section4Text /></div>
-        <div style={{ height: "100vh" }} />
-      </div>
+          <div id="section-1"><Section1Text /></div>
+          <div id="section-2"><Section2Text /></div>
+          <div id="section-3"><Section3Text /></div>
+          <div id="section-4"><Section4Text /></div>
+          <div style={{ height: "100vh" }} />
+        </div>
+      )}
 
       <Footer />
 
-      <HUD activeSection={activeSection} visible={hudVisible} />
-      <BlackFadeOverlay totalSections={TOTAL_SECTIONS} />
+      {!isMobile && <HUD activeSection={activeSection} visible={hudVisible} />}
+      {!isMobile && <BlackFadeOverlay totalSections={TOTAL_SECTIONS} />}
     </div>
   );
 }
