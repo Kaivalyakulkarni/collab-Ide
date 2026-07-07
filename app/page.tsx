@@ -403,14 +403,48 @@ function HeroSection() {
 
         /* ---- Mobile responsiveness ---- */
         @media (max-width: 768px) {
+          .hero-nav { padding: 10px 16px; }
+          .hero-nav.scrolled { width: 92%; padding: 10px 16px; }
           .hero-navlinks { display: none; }
-          .hero-nav { padding: 12px 18px; }
-          .hero-nav.scrolled { width: 92%; padding: 12px 18px; }
+          .hero-logo { font-size: 0.9rem; }
+          .hero-nav-cta { font-size: 0.72rem; padding: 8px 13px; }
+
+          .hero-section { padding-top: 76px; min-height: 92vh; }
           .hero-inner { padding: 0 20px; }
-          .hero-sub { font-size: 0.92rem; margin-top: 1.2rem; }
-          .hero-ctas { margin-top: 1.8rem; }
-          .hero-btn-primary, .hero-btn-secondary { padding: 12px 20px; font-size: 0.82rem; }
+
+          .hero-eyebrow { font-size: 0.66rem; margin-bottom: 0.8rem; }
+          .hero-eyebrow::before { width: 6px; height: 6px; }
+
+          .hero-h1 {
+            font-size: clamp(2rem, 9.5vw, 2.6rem) !important;
+            line-height: 1.12 !important;
+            letter-spacing: -0.01em !important;
+            max-width: 100% !important;
+          }
+
+          .hero-sub { font-size: 0.88rem; line-height: 1.6; margin-top: 1.1rem; max-width: 100%; }
+
+          .hero-ctas {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            gap: 0.7rem;
+            margin-top: 1.8rem;
+          }
+          .hero-btn-primary, .hero-btn-secondary {
+            width: 100%;
+            justify-content: center;
+            padding: 13px 20px;
+            font-size: 0.82rem;
+          }
+
           .hero-scroll-cue { display: none; }
+        }
+
+        @media (max-width: 380px) {
+          .hero-h1 { font-size: clamp(1.7rem, 10vw, 2.1rem) !important; }
+          .hero-logo { font-size: 0.82rem; }
+          .hero-nav-cta { font-size: 0.66rem; padding: 7px 11px; }
         }
       `}</style>
       <div className="hero-wrap" id="hero-wrapper" ref={heroRef}>
