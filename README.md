@@ -1,2042 +1,1160 @@
-
 # Collab IDE
 
-<p align="center">
-  <img src="./screenshots/editor.png" alt="Collab IDE" width="100%">
-</p>
+Built for Collaboration.  
+Engineered for Developers.
 
-<h1 align="center">Collab IDE</h1>
+A browser-native development workspace built to bring collaborative coding, secure execution, version control, and AI assistance into a single developer environment.
 
-<p align="center">
-A modern browser-based collaborative IDE built with Next.js, Monaco Editor, Yjs, Docker, PostgreSQL and AI-assisted development.
-</p>
+[Live Demo] · [Source Code]
 
-<p align="center">
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![React](https://img.shields.io/badge/React-19-61DAFB)
-![Monaco](https://img.shields.io/badge/Monaco-Editor-007ACC)
-![Yjs](https://img.shields.io/badge/Yjs-CRDT-orange)
-![Docker](https://img.shields.io/badge/Docker-Sandbox-2496ED)
-![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748)
-![Supabase](https://img.shields.io/badge/PostgreSQL-Supabase-3ECF8E)
-![License](https://img.shields.io/badge/License-MIT-success)
+![Collab IDE Editor Preview](./screenshots/editor.png)
 
-</p>
 
----
+## The Question That Started It All
 
-# Live Demo
+How can multiple developers work on the same project at the same time without getting in each other's way?
 
-https://collab-ide-nine.vercel.app
+Modern software development is collaborative by nature, but the workflow is still distributed across different tools.
 
-Repository:
+Developers write code in one place, communicate somewhere else, run applications through another system, and manage changes through separate workflows.
 
-https://github.com/Kaivalyakulkarni/collab-Ide
+Collab IDE started by exploring a simple idea:
+
+> What if the entire collaborative development workflow could exist inside a single browser workspace?
+
+
+# Product Tour
+
+Collab IDE brings the complete development workflow into a single browser workspace — from creating a project to writing, running, and collaborating on code together.
 
 ---
 
-# Overview
+## Create a Project
 
-Collab IDE is a full-stack cloud development environment designed to recreate the experience of a modern desktop IDE directly inside the browser. The project combines real-time collaborative editing, isolated code execution, Git workflows, AI-assisted development, and project management into a unified workspace.
+Every collaboration starts with a shared workspace.
 
-Instead of focusing on only one aspect of software development, the application aims to support the complete workflow followed by modern development teams—from project creation and contributor management to writing, executing, and committing code.
+Developers can create a project, configure the environment, and invite teammates to start building together from one place.
 
-The editor is powered by Monaco, synchronization is handled through Yjs CRDTs over WebSockets, execution occurs inside disposable Docker containers, and authentication is implemented using GitHub OAuth with NextAuth.
-
----
-
-# Philosophy
-
-Most browser IDEs excel in one domain:
-
-- collaboration
-- execution
-- AI assistance
-- project management
-
-Collab IDE attempts to combine all of these capabilities into a single coherent platform while preserving a familiar developer experience.
-
-The objective is not to replace desktop IDEs, but to make collaborative development frictionless for teams that need to prototype, learn, or build together without installing a local environment.
+![Create Project](./assets/create-project.png)
 
 ---
 
-# Screenshot Showcase
+## Invite Members
 
-## Dashboard
+A project becomes collaborative when the right people can join the workspace.
 
-<p align="center">
-<img src="./screenshots/dashboard.png" width="95%">
-</p>
+Members can be invited into the project, giving everyone a shared environment where code, changes, and progress stay connected.
 
-The dashboard serves as the central hub for projects, recent activity, invitations, and developer productivity.
+![Invite Members](./assets/invite-members.png)
 
 ---
 
-## Project Workspace
+## Collaborate in Real Time
 
-<p align="center">
-<img src="./screenshots/project-dashboard.png" width="95%">
-</p>
+The editor is where collaboration comes alive.
 
-Each project includes contributors, project metadata, discussions, settings, and quick access to the collaborative editor.
+Multiple developers can work on the same codebase simultaneously, with synchronized files and live presence inside the workspace.
 
----
-
-## Collaborative Editor
-
-<p align="center">
-<img src="./screenshots/editor.png" width="95%">
-</p>
-
-The editor integrates Monaco, Docker-backed terminals, Git operations, AI completions, and real-time collaboration into a VS Code–inspired workspace.
+![Collaborative Editor](./screenshots/editor.png)
 
 ---
 
-# Core Capabilities
+## Run and Debug
+
+Writing code is only part of the workflow.
+
+Collab IDE connects the editor with an integrated terminal and isolated execution environment, allowing developers to run and test their code without leaving the workspace.
+
+![Terminal and Execution](./assets/terminal.png)
+
+---
+
+## A Complete Development Workspace
+
+From editing code to managing changes, Collab IDE brings essential development workflows together inside one environment.
+
+Version control, AI assistance, and project management extend the collaborative experience beyond the editor.
+
+![Complete Workspace](./assets/workspace.png)
+
+
+# Engineering Pillars
+
+Building a collaborative development environment required solving problems across real-time synchronization, secure execution, developer tooling, and intelligent assistance.
+
+Each pillar represents a core system that makes the Collab IDE experience possible.
+
+---
 
 ## Real-Time Collaboration
 
-- Simultaneous editing
-- Presence awareness
-- Colored cursors
-- Conflict-free synchronization
-- Shared project workspace
+The foundation of Collab IDE.
 
-## Development Environment
+Multiple developers need to edit the same codebase simultaneously without conflicts or inconsistent states.
+
+To achieve this, Collab IDE uses a collaborative editing architecture that synchronizes changes in real time while maintaining each user's presence inside the workspace.
+
+Built with:
+
+- Yjs
+- Monaco Editor
+- WebSocket communication
+
+![Real Time Collaboration](./assets/collaboration.png)
+
+---
+
+## Secure Code Execution
+
+Writing code is only useful when developers can run and test it.
+
+Collab IDE provides an isolated execution environment that allows users to execute code safely without affecting the host system.
+
+The execution layer handles:
+
+- Running user programs
+- Managing isolated environments
+- Connecting execution results back to the workspace
+
+Built with:
+
+- Docker
+- node-pty
+
+![Code Execution](./assets/execution.png)
+
+---
+
+## Integrated Developer Environment
+
+A modern developer workflow requires more than just an editor.
+
+Collab IDE connects the editor, terminal, file system, and project workspace into a single browser experience.
+
+Developers can navigate files, execute commands, and manage their workflow without switching between different tools.
+
+Built with:
 
 - Monaco Editor
-- Multi-file workspace
-- File explorer
-- Integrated terminal
-- Git panel
-- AI inline completion
+- xterm.js
+- File system integration
 
-## Project Management
+![Developer Environment](./assets/ide.png)
 
-- GitHub authentication
-- Team invitations
-- Contributor management
+---
+
+## Version Control Inside the Browser
+
+Collaboration also requires managing changes.
+
+Collab IDE integrates Git workflows directly into the development environment, allowing projects to interact with repositories without leaving the browser.
+
+Built with:
+
+- isomorphic-git
+- GitHub integration
+
+![Git Integration](./assets/git.png)
+
+---
+
+## AI-Assisted Development
+
+AI assistance extends the collaborative workflow by helping developers write and understand code faster.
+
+The goal is not to replace developers, but to provide contextual support directly inside the workspace.
+
+Built with:
+
+- Groq API
+- AI completion workflow
+
+![AI Assistance](./assets/ai.png)
+
+---
+
+## Bringing Everything Together
+
+Each system solves a different challenge, but they are designed around one goal:
+
+Creating a complete browser-native environment where developers can build, run, and collaborate together.
+
+
+# Architecture
+
+Collab IDE is built as a distributed system where the frontend, backend services, real-time collaboration layer, execution environment, and external integrations work together to deliver a browser-native development experience.
+
+Instead of treating editing, execution, version control, and collaboration as separate tools, Collab IDE unifies them into a single workspace where developers can build together without leaving the browser.
+
+![System Architecture](./assets/architecture.png)
+
+---
+
+## High-Level Overview
+
+The platform is composed of independent systems, each responsible for a specific part of the development workflow.
+
+```text
+                                   Browser
+                                      │
+                                      ▼
+                         Next.js (Frontend Application)
+                                      │
+             ┌────────────────────────┼────────────────────────┐
+             │                        │                        │
+             ▼                        ▼                        ▼
+      Authentication          Project Services        Collaboration Server
+        (NextAuth)              (API Routes)          (Yjs + WebSockets)
+             │                        │                        │
+             └───────────────┬────────┴───────────────┬────────┘
+                             ▼                        ▼
+                     PostgreSQL Database      Shared Document State
+                         (Supabase)
+                             │
+                             ▼
+                        Prisma ORM
+                             │
+        ┌────────────────────┼────────────────────┐
+        ▼                    ▼                    ▼
+ Docker Sandbox         Git Integration      AI Assistance
+ (node-pty)           (isomorphic-git)         (Groq API)
+```
+
+Each layer is isolated by responsibility, making the application easier to maintain, extend, and scale.
+
+---
+
+## Frontend Layer
+
+The frontend provides the complete development experience inside the browser.
+
+It is responsible for presenting every part of the workspace while keeping interactions responsive and synchronized.
+
+### Responsibilities
+
+- Authentication flow
 - Project dashboard
-- Settings and metadata
-
-## Execution
-
-Every execution request is isolated inside a Docker container, preventing user code from affecting the host application.
-
----
-
-# High-Level Architecture
-
-```text
-Browser
-   │
-   ▼
-Next.js App Router
-   │
-   ├── Authentication
-   ├── Dashboard
-   ├── Collaborative Editor
-   └── API Routes
-          │
-          ▼
-      Prisma ORM
-          │
-          ▼
- Supabase PostgreSQL
-
-Realtime Layer
-
-Monaco Editor
-      │
-      ▼
-     Yjs
-      │
-      ▼
- WebSocket Server
-
-Execution
-
-Editor
-   │
-   ▼
-Docker Sandbox
-   │
-   ▼
-node-pty + xterm.js
-```
-
----
-
-# Technology Overview
-
-| Area | Technology |
-|------|------------|
-| Frontend | Next.js, React, TypeScript |
-| Styling | Tailwind CSS |
-| Editor | Monaco |
-| Collaboration | Yjs, y-monaco |
-| Realtime | WebSocket |
-| AI | Groq |
-| Execution | Docker, node-pty, xterm.js |
-| Database | PostgreSQL, Prisma, Supabase |
-| Authentication | NextAuth v5 |
-| Landing Page | React Three Fiber, GSAP |
-
----
-
-# What Makes This Project Different
-
-Unlike many educational IDE projects, Collab IDE focuses on integrating several production-inspired systems into one application:
-
-- Real-time CRDT-based editing
-- Secure containerized execution
-- AI-assisted coding
-- Browser-native Git workflow
-- Project and collaborator management
-- Modern animated landing experience
-
-
-# Product Walkthrough
-
-Collab IDE is designed around the idea that developers should not have to switch between multiple tools during the software development lifecycle. Rather than treating the editor, terminal, version control, collaboration, and project management as independent applications, Collab IDE integrates them into a single browser-native workspace.
-
-Every screen in the application has been designed with this philosophy in mind. The dashboard helps developers organize projects, the project workspace acts as a collaboration hub, and the editor provides everything required to write, execute, and manage code.
-
----
-
-# Dashboard
-
-<p align="center">
-    <img src="./screenshots/dashboard.png" width="95%">
-</p>
-
-The dashboard is the first screen users interact with after authentication. Instead of simply listing projects, it acts as a central workspace where users can quickly understand everything happening across their development environment.
-
-The interface is intentionally minimal while still surfacing the information that matters most.
-
-The dashboard allows users to:
-
-- View all active projects
-- Create new collaborative projects
-- Browse recent activity
-- View pending invitations
-- Access project statistics
-- Navigate directly into the editor
-- Manage account information
-- Access project settings
-
-Unlike many dashboards that simply display cards, this dashboard is designed to reduce navigation by exposing frequently used actions immediately.
-
----
-
-# Project Cards
-
-Each project is represented as a compact summary card.
-
-Rather than only displaying the project title, every card contains contextual information that helps developers understand the current state of the project before opening it.
-
-Each card includes:
-
-- Project name
-- Description
-- Technology stack
-- Contributor count
-- Last activity
-- Project owner
-- Visibility
-- Quick navigation
-
-The intention is that a developer can identify the correct project within seconds without opening multiple pages.
-
----
-
-# Creating a Project
-
-Creating a collaborative workspace is intentionally straightforward.
-
-Users are guided through a structured workflow where the required project information is collected before the workspace is initialized.
-
-The creation process includes:
-
-- Project title
-- Description
-- Programming language
-- Visibility
-- Initial collaborators
-- Repository information
-- Project metadata
-
-Once submitted, the project is persisted in PostgreSQL through Prisma and becomes immediately available inside the dashboard.
-
----
-
-# Project Workspace
-
-<p align="center">
-    <img src="./screenshots/project-dashboard.png" width="95%">
-</p>
-
-The project workspace serves as the operational center for every collaborative project.
-
-Instead of immediately opening the editor, developers first enter a workspace where project information, contributors, discussions, and management tools are available.
-
-This separation keeps project administration independent from the coding experience.
-
-The workspace currently includes:
-
-- Overview
-- Contributors
-- Discussions
-- Settings
-- Project information
-- Quick access to the editor
-
-As additional functionality is introduced, these sections can be expanded without affecting the editor experience.
-
----
-
-# Contributor Management
-
-Modern software development is collaborative.
-
-For this reason, contributor management is treated as a first-class feature rather than an afterthought.
-
-Project owners can manage collaborators directly from the workspace.
-
-Supported operations include:
-
-- Invite contributors
-- Remove collaborators
-- View member roles
-- Transfer ownership
-- Generate invitation links
-- Manage permissions
-
-The permission model has been designed so that future role-based access control can be added without restructuring the application.
-
----
-
-# Invitation System
-
-Collaboration begins with inviting developers into a workspace.
-
-Rather than manually creating accounts or exchanging credentials, invitation tokens provide a secure mechanism for joining projects.
-
-The invitation workflow follows these steps:
-
-1. Owner generates an invitation.
-2. A unique token is created.
-3. The token is shared with another developer.
-4. The invited developer authenticates using GitHub.
-5. Membership is verified.
-6. Access is granted automatically.
-
-This approach keeps onboarding simple while maintaining project security.
-
----
-
-# Editor Workspace
-
-<p align="center">
-    <img src="./screenshots/editor.png" width="95%">
-</p>
-
-The editor is the core of the entire platform.
-
-Every surrounding feature ultimately exists to support this workspace.
-
-The design intentionally resembles a professional desktop IDE so that developers immediately feel comfortable.
-
-The editor consists of multiple integrated components that work together as a single environment.
-
-These include:
-
-- File Explorer
+- File explorer
+- Monaco code editor
+- Integrated terminal
+- Real-time collaboration interface
+- Project management screens
+
+### Built With
+
+- Next.js (App Router)
+- React
+- TypeScript
 - Monaco Editor
-- Terminal
-- Git Panel
-- AI Assistant
-- Status Bar
-- Presence Indicators
-- Multi-file Tabs
+- xterm.js
 
-Because these tools are tightly integrated, developers rarely need to leave the browser while working.
+![Frontend Architecture](./assets/frontend-layer.png)
 
 ---
 
-# File Explorer
+## Backend Layer
 
-The file explorer provides a hierarchical representation of the project directory.
+The backend coordinates the application's business logic and acts as the bridge between users, data, collaboration, and execution.
 
-Users can perform common file operations directly from the interface without using terminal commands.
+Rather than handling rendering, its primary responsibility is orchestrating the systems that power the workspace.
 
-Supported operations include:
+### Responsibilities
 
-- Create files
-- Create folders
-- Rename files
-- Rename folders
-- Delete resources
-- Navigate nested directories
-
-The interface automatically updates after each operation, ensuring the project tree always reflects the current filesystem state.
-
----
-
-# Multi-file Editing
-
-Modern development rarely involves editing a single file.
-
-To support realistic workflows, multiple files can remain open simultaneously.
-
-Each file opens inside its own Monaco tab.
-
-Developers can switch instantly between files while preserving editor state.
-
-This creates an experience comparable to desktop editors like Visual Studio Code.
-
----
-
-# Breadcrumb Navigation
-
-Breadcrumbs display the current file hierarchy.
-
-Instead of relying solely on the file explorer, developers always know exactly where the active file exists within the project.
-
-This becomes increasingly valuable as projects grow larger.
-
----
-
-# Status Bar
-
-The status bar provides contextual information about the current editing session.
-
-Examples include:
-
-- AI completion state
-- Active file
-- Editor status
-- Collaboration state
-- Connection status
-
-Because the information is always visible, developers rarely need to search through menus to understand the editor's current state.
-
----
-
-# Integrated Terminal
-
-A development environment is incomplete without a terminal.
-
-While many browser-based editors focus only on file editing, Collab IDE integrates a fully interactive terminal directly into the workspace, allowing developers to compile, execute, and debug applications without leaving the browser.
-
-The terminal is built using **xterm.js** for rendering and **node-pty** for process communication, providing an experience that closely resembles a native terminal application.
-
-Unlike lightweight console implementations, the terminal maintains a persistent interactive session, allowing developers to execute multiple commands sequentially during development.
-
----
-
-# Docker-Powered Code Execution
-
-Executing arbitrary user code directly on the application server introduces significant security risks.
-
-To address this, every execution request is isolated inside a disposable Docker container.
-
-The execution pipeline follows these steps:
-
-1. The current workspace is synchronized.
-2. Required project files are written to a temporary workspace.
-3. A Docker container is created.
-4. The workspace is mounted into the container.
-5. Commands are executed through node-pty.
-6. Output is streamed back to xterm.js in real time.
-7. Temporary resources are cleaned up once execution finishes.
-
-This architecture ensures that user code never executes directly on the host server while preserving an interactive development experience.
-
-Advantages include:
-
-- Process isolation
-- Filesystem isolation
-- Safe execution of arbitrary code
-- Disposable runtime environments
-- Consistent execution across projects
-
----
-
-# Live Output Streaming
-
-Instead of waiting for execution to complete before returning output, terminal data is streamed incrementally.
-
-This provides immediate feedback during execution, making long-running programs feel responsive.
-
-Developers can observe:
-
-- Build progress
-- Compilation errors
-- Runtime exceptions
-- Console logs
-- Interactive prompts
-
-Streaming output significantly improves the usability of the editor compared to traditional request-response execution models.
-
----
-
-# Git Integration
-
-Version control is an essential part of modern software development.
-
-Rather than requiring users to open an external terminal and execute Git commands manually, Collab IDE exposes common Git workflows through a dedicated interface.
-
-The implementation is powered by **isomorphic-git**, allowing repository operations directly inside the browser.
-
-Current capabilities include:
-
-- Initialize repository
-- View repository status
-- Stage changes
-- Commit updates
-
-The interface is intentionally simple while providing enough functionality for day-to-day development.
-
-As the project evolves, additional Git workflows such as branching, merging, pull, push, and remote synchronization can be introduced without changing the overall interface.
-
----
-
-# AI-Assisted Development
-
-One of the defining features of Collab IDE is the integration of AI-powered inline code completion.
-
-Rather than opening a separate chat interface, suggestions appear directly inside the editor as developers type.
-
-This interaction model closely mirrors modern AI-assisted development tools while remaining fully integrated into the editing experience.
-
-The system is powered by Groq's **llama-3.3-70b-versatile** model.
-
-Suggestions are delivered through Monaco Editor's `InlineCompletionsProvider`, allowing completions to behave as native editor features rather than external overlays.
-
-Key capabilities include:
-
-- Context-aware suggestions
-- Inline ghost text
-- Low-latency responses
-- Adjustable completion strength
-- Enable/disable controls from the status bar
-
-The objective is to assist developers without interrupting their workflow.
-
----
-
-# Real-Time Collaboration
-
-Collaboration is implemented using **Yjs**, a Conflict-free Replicated Data Type (CRDT) library designed for distributed editing.
-
-Unlike traditional locking systems, CRDTs allow multiple users to edit the same document simultaneously without introducing merge conflicts.
-
-Every participant maintains a synchronized copy of the document.
-
-Local edits are propagated through the WebSocket server and merged deterministically across all connected clients.
-
-This architecture provides:
-
-- Near real-time synchronization
-- Conflict-free editing
-- Offline-friendly document structures
-- Reliable state convergence
-
-Developers can collaborate naturally without worrying about overwriting one another's work.
-
----
-
-# Presence Awareness
-
-Collaboration extends beyond document synchronization.
-
-The editor also communicates the presence of connected collaborators.
-
-Users are able to see:
-
-- Active participants
-- Colored cursors
-- Live cursor movement
-- Selection updates
-- Current editing locations
-
-Presence awareness improves communication by making collaboration feel more natural and reducing accidental editing conflicts.
-
----
-
-# Authentication
-
-Access to the platform is secured through GitHub OAuth using NextAuth v5.
-
-Developers authenticate using their GitHub accounts, eliminating the need for traditional username/password registration.
-
-The authentication layer has been customized due to compatibility limitations between Prisma's latest driver adapter and the standard NextAuth Prisma adapter.
-
-Instead of relying on the default implementation, authentication is performed using carefully structured raw SQL queries executed through Prisma.
-
-This approach maintains compatibility while preserving the flexibility of NextAuth's session management.
-
----
-
-# Project Security
-
-Several design decisions prioritize security throughout the application.
-
-These include:
-
-- GitHub OAuth authentication
-- Server-side session validation
-- Docker sandbox isolation
-- Temporary execution environments
-- Protected API routes
-- Controlled collaborator access
-- Invitation token verification
-
-Although Collab IDE is intended primarily as a learning and collaboration platform, these measures establish a solid security foundation for future expansion.
-
----
-
-# Responsive Experience
-
-The interface has been designed to function across a wide range of devices.
-
-Rather than simply hiding complex desktop components through CSS, the landing page uses conditional rendering to avoid mounting expensive WebGL scenes on smaller devices.
-
-For desktop users:
-
-- Interactive React Three Fiber scene
-- GSAP-driven animations
-- Scroll-triggered transitions
-- Shader-based visual effects
-
-For mobile users:
-
-- Lightweight static interface
-- Reduced rendering overhead
-- Improved battery efficiency
-- Faster loading times
-
-This design choice prioritizes performance while preserving the visual identity of the application.
-
----
-
-# User Experience Principles
-
-Throughout the application, several guiding principles influence interface design.
-
-### Familiarity
-
-The editor intentionally resembles desktop development environments to minimize the learning curve.
-
-### Consistency
-
-Common actions appear in predictable locations throughout the application.
-
-### Responsiveness
-
-Animations enhance usability without delaying interaction.
-
-### Simplicity
-
-Complex workflows are broken into manageable interfaces rather than exposing unnecessary configuration.
-
-### Performance
-
-Large visual features are loaded only when required, reducing resource consumption.
-
----
-
-# Summary
-
-Collab IDE is more than an online code editor.
-
-It combines project management, collaborative editing, secure code execution, AI-assisted development, Git workflows, and modern interface design into a unified browser-native development environment.
-
-The following section explores the engineering decisions, system architecture, and implementation details that make these capabilities possible.
-
-
-# System Architecture
-
-Collab IDE has been designed as a modular full-stack application where each subsystem is responsible for a well-defined part of the development workflow. Rather than relying on a monolithic backend, the application combines several independent services that work together to provide a seamless browser-based development experience.
-
-At a high level, the architecture consists of five major layers:
-
-- Client Application
-- Application Server
-- Database
-- Real-Time Collaboration Layer
-- Execution Environment
-
-Each layer is responsible for a specific concern, making the application easier to maintain, extend, and scale.
-
----
-
-# Overall Architecture
-
-```text
-                               Browser
-
-                                   │
-
-                 ┌─────────────────┴─────────────────┐
-                 │                                   │
-                 ▼                                   ▼
-
-         React Components                     React Three Fiber
-
-                 │
-                 ▼
-
-          Next.js App Router
-
-                 │
-
-      ┌──────────┼──────────┐
-      ▼          ▼          ▼
-
- Authentication  Editor   Dashboard
-
-      │          │          │
-      └──────────┼──────────┘
-                 ▼
-
-             API Routes
-
-                 │
-
-     ┌───────────┼────────────┐
-     ▼           ▼            ▼
-
- PostgreSQL   WebSocket     Docker
-  Prisma        Server      Sandbox
-
-                 │
-
-                 ▼
-
-             Monaco + Yjs
-
-                 │
-
-                 ▼
-
-          Connected Clients
-```
-
----
-
-# Application Layers
-
-## Presentation Layer
-
-The presentation layer is responsible for rendering the user interface.
-
-It includes:
-
-- Dashboard
-- Landing Page
-- Project Workspace
-- Collaborative Editor
-- Authentication Screens
-- Project Settings
-- Git Interface
-- Terminal
-
-The interface is built using React Server Components where appropriate, reducing unnecessary client-side JavaScript while improving initial load performance.
-
----
-
-## Business Logic Layer
-
-The application logic lives primarily inside Next.js API Routes.
-
-Responsibilities include:
-
-- Authentication
+- User authentication
 - Project management
-- Contributor management
-- Invitation handling
-- File operations
-- Git operations
-- AI requests
-- Database communication
+- Workspace management
+- Permission handling
+- Repository operations
+- Execution requests
+- API endpoints
 
-Separating business logic from presentation keeps the codebase maintainable and enables future migration to dedicated backend services if required.
+### Built With
 
----
+- Next.js API Routes
+- NextAuth v5
+- Prisma ORM
+- PostgreSQL (Supabase)
 
-## Persistence Layer
-
-Persistent application data is stored inside PostgreSQL.
-
-Prisma acts as the ORM responsible for:
-
-- Schema management
-- Type-safe database queries
-- Relationships
-- Migrations
-- Transactions
-
-The relational model naturally represents users, projects, collaborators, files, invitations, and permissions.
+![Backend Architecture](./assets/backend-layer.png)
 
 ---
 
-# Database Design
+## Real-Time Collaboration Layer
 
-The database forms the foundation of the platform.
+Real-time collaboration is the foundation of Collab IDE.
 
-Major entities include:
+Multiple developers should be able to edit the same project simultaneously while seeing each other's changes almost instantly.
+
+Instead of relying on traditional request-response synchronization, Collab IDE uses Conflict-free Replicated Data Types (CRDTs) to synchronize document state across connected users.
+
+### Collaboration Flow
 
 ```text
-User
- │
- ├── Projects
- │
- ├── Invitations
- │
- ├── Sessions
- │
- └── Accounts
-
-Project
- │
- ├── Files
- ├── Members
- ├── Discussions
- ├── Git History
- └── Settings
+Developer A edits a file
+          │
+          ▼
+     Monaco Editor
+          │
+          ▼
+      Yjs Document
+          │
+          ▼
+   WebSocket Broadcast
+          │
+          ▼
+Developer B receives update
+          │
+          ▼
+ Local editor synchronizes
 ```
 
-Each project maintains relationships with collaborators and project resources, enabling efficient querying without data duplication.
+### Built With
+
+- Yjs
+- WebSockets
+- Monaco Editor
+- CRDT Architecture
+
+![Collaboration Layer](./assets/collaboration-layer.png)
 
 ---
 
-# Authentication Flow
+## Execution Layer
 
-Authentication is handled using GitHub OAuth through NextAuth v5.
+Writing code is only one part of development.
 
-The authentication lifecycle follows this sequence:
+Developers also need to execute, test, and debug their applications safely.
+
+Collab IDE isolates every execution request inside Docker containers, preventing user code from interacting directly with the host environment.
+
+### Execution Flow
 
 ```text
-User
-
- │
-
- ▼
-
-Login Button
-
- │
-
- ▼
-
-GitHub OAuth
-
- │
-
- ▼
-
-Authorization Code
-
- │
-
- ▼
-
-NextAuth
-
- │
-
- ▼
-
-Custom SQL Adapter
-
- │
-
- ▼
-
-PostgreSQL
-
- │
-
- ▼
-
-Authenticated Session
-```
-
-Unlike the standard Prisma adapter, a custom raw SQL implementation is used to ensure compatibility with Prisma's latest PostgreSQL driver.
-
----
-
-# Why a Custom NextAuth Adapter?
-
-One of the more interesting engineering decisions within the project is the authentication implementation.
-
-During development, Prisma's newer PostgreSQL driver adapter introduced compatibility issues with the official NextAuth Prisma adapter.
-
-Instead of downgrading dependencies or abandoning Prisma, a custom adapter was implemented using raw SQL queries executed through Prisma.
-
-Benefits include:
-
-- Full compatibility
-- Better control
-- Type safety
-- Future flexibility
-- Cleaner debugging
-
-This demonstrates an engineering-first approach where the implementation adapts to technical constraints rather than forcing the project to depend on unsupported configurations.
-
----
-
-# Real-Time Collaboration
-
-Real-time editing is powered by Yjs.
-
-Unlike traditional operational transformation systems, Yjs uses Conflict-free Replicated Data Types (CRDTs).
-
-Every connected client maintains its own copy of the document.
-
-Local edits are immediately applied.
-
-Updates are synchronized through the WebSocket server and merged deterministically across all participants.
-
-```text
-Developer A
-
-     │
-
-     ▼
-
-Local Document
-
-     │
-
-     ▼
-
-Yjs Update
-
-     │
-
-     ▼
-
-WebSocket Server
-
-     │
-
- ┌───┴────┐
-
- ▼        ▼
-
-User B   User C
-```
-
-This architecture guarantees eventual consistency while eliminating merge conflicts.
-
----
-
-# Presence Synchronization
-
-Editing alone is not enough.
-
-The collaboration system also synchronizes user presence.
-
-Every client broadcasts:
-
-- Cursor location
-- Selection range
-- Active document
-- User identity
-- Connection state
-
-These updates allow developers to understand what teammates are doing without interrupting their workflow.
-
----
-
-# Monaco Integration
-
-Monaco Editor serves as the editing engine.
-
-Instead of building a custom editor, the project integrates the same technology used by Visual Studio Code.
-
-Advantages include:
-
-- Professional editing experience
-- Syntax highlighting
-- Language support
-- IntelliSense APIs
-- Decorations
-- Inline completions
-
-Yjs binds directly to Monaco through **y-monaco**, allowing collaborative editing without modifying Monaco's internal implementation.
-
----
-
-# AI Completion Pipeline
-
-Inline AI suggestions are integrated directly into Monaco.
-
-The request lifecycle is intentionally lightweight.
-
-```text
-Developer Types
-
-        │
-
-        ▼
-
-Current Cursor Context
-
-        │
-
-        ▼
-
-Groq API
-
-        │
-
-        ▼
-
-LLM Response
-
-        │
-
-        ▼
-
-InlineCompletionsProvider
-
-        │
-
-        ▼
-
-Ghost Text Suggestion
-```
-
-Unlike chat-based assistants, suggestions appear directly within the editing flow, minimizing disruption.
-
----
-
-# Docker Execution Pipeline
-
-Executing arbitrary code safely requires strict isolation.
-
-Every execution request follows the same lifecycle.
-
-```text
-Open Workspace
-
-        │
-
-        ▼
-
-Synchronize Files
-
-        │
-
-        ▼
-
-Temporary Directory
-
-        │
-
-        ▼
-
+Run Code
+    │
+    ▼
+Execution Request
+    │
+    ▼
 Docker Container
-
-        │
-
-        ▼
-
-node-pty
-
-        │
-
-        ▼
-
-xterm.js
-
-        │
-
-        ▼
-
-Terminal Output
+    │
+    ▼
+node-pty Terminal
+    │
+    ▼
+Program Output
+    │
+    ▼
+Browser Terminal
 ```
 
-The container is discarded after execution, ensuring that no state leaks between sessions.
+### Built With
+
+- Docker
+- node-pty
+- xterm.js
+
+![Execution Layer](./assets/execution-layer.png)
 
 ---
 
-# File Synchronization
+## Version Control Layer
 
-One challenge of browser-based IDEs is maintaining consistency between the editor and the execution environment.
+Collaboration extends beyond editing files.
 
-Before execution:
+Projects eventually need commits, branches, and synchronization with remote repositories.
 
-- Files are collected
-- Changes are synchronized
-- Temporary workspace is created
-- Docker mounts the workspace
-- Execution begins
+Instead of depending on Git installed on a server, Collab IDE integrates browser-native Git operations directly into the workspace.
 
-After execution:
+### Responsibilities
 
-- Output is streamed
-- Temporary resources are removed
-- Editor remains synchronized
+- Repository interaction
+- Commit operations
+- File synchronization
+- Version tracking
 
-This guarantees that the code executed always matches what the developer sees inside the editor.
+### Built With
 
----
+- isomorphic-git
+- GitHub
 
-# Git Workflow
-
-Git functionality is implemented entirely in the browser using **isomorphic-git**.
-
-Typical workflow:
-
-```text
-Modified Files
-
-      │
-
-      ▼
-
-Status
-
-      │
-
-      ▼
-
-Stage
-
-      │
-
-      ▼
-
-Commit
-
-      │
-
-      ▼
-
-Repository Updated
-```
-
-Removing dependence on the system Git executable makes the feature platform-independent and easier to integrate into the browser environment.
+![Git Layer](./assets/git-layer.png)
 
 ---
 
-# Landing Page Architecture
+## AI Assistance Layer
 
-The landing page is intentionally separated from the application dashboard.
+AI assistance is integrated directly into the development workflow rather than existing as a separate application.
 
-Rather than functioning as a static marketing page, it demonstrates several frontend engineering techniques.
+Its role is to help developers write code faster while remaining inside the editor.
 
-These include:
+### Responsibilities
 
-- React Three Fiber
-- GSAP ScrollTrigger
-- Shader gradients
-- Conditional rendering
-- Scroll-based storytelling
+- Inline code assistance
+- Context-aware suggestions
+- Developer productivity
 
-Desktop users receive a fully interactive WebGL experience.
+### Built With
 
-Mobile users receive an optimized static layout where the 3D scene is never mounted, reducing GPU usage and improving load times.
+- Groq API
 
----
-
-# Scalability Considerations
-
-The architecture has been designed with future growth in mind.
-
-Potential future improvements include:
-
-- Dedicated microservices
-- Redis caching
-- Horizontal WebSocket scaling
-- Object storage for project assets
-- Background job queues
-- Multi-region deployment
-
-Because each subsystem has clear responsibilities, these upgrades can be introduced without significant architectural changes.
+![AI Layer](./assets/ai-layer.png)
 
 ---
 
-# Architectural Principles
+## Data Layer
 
-Throughout development, several principles guided implementation decisions:
+Persistent application state is managed through PostgreSQL using Prisma as the data access layer.
 
-- Separation of concerns
-- Developer-first user experience
-- Security through isolation
-- Modular design
-- Progressive enhancement
-- Performance over unnecessary abstraction
-- Familiar desktop-inspired workflows
+The database stores the information required to recreate projects, workspaces, and developer relationships.
 
-These principles influenced nearly every component of the project and continue to provide a foundation for future development.
+### Stores
+
+- Users
+- Projects
+- Members
+- Files
+- Permissions
+- Workspace metadata
+
+### Built With
+
+- PostgreSQL
+- Supabase
+- Prisma ORM
+
+![Database Layer](./assets/database-layer.png)
 
 ---
+
+## Architecture Principles
+
+The architecture of Collab IDE follows a simple principle:
+
+**Each system should have one responsibility.**
+
+- The frontend focuses on developer experience.
+- The backend coordinates application logic.
+- The collaboration layer synchronizes developers.
+- The execution layer safely runs code.
+- The data layer persists application state.
+- External services extend the platform without tightly coupling it to third-party providers.
+
+Keeping these systems independent makes the application easier to reason about, test, and evolve as new features are added.
+
+---
+
+## Bringing Everything Together
+
+No single technology defines Collab IDE.
+
+The project is the result of multiple independent systems working together to solve one problem:
+
+> **How can multiple developers build software together inside a single browser-native workspace?**
+
+The chapters that follow explain the engineering decisions behind these systems and why specific technologies were chosen to build them.
+
 
 # Engineering Decisions
 
-Every technology used in Collab IDE was selected to solve a specific problem rather than simply following popular trends. Throughout development, priority was given to technologies that improved developer experience, maintainability, scalability, and long-term flexibility.
+Every technology in Collab IDE was chosen to solve a specific engineering problem.
 
-The following sections explain the reasoning behind each major architectural decision.
+This project wasn't built by collecting popular frameworks. Each decision was driven by a question that emerged while building a collaborative development environment.
 
----
-
-# Why Next.js?
-
-Instead of using a traditional React application with a separate backend, the project is built using the Next.js App Router.
-
-This approach provides several advantages:
-
-- Server Components
-- File-based routing
-- API Routes
-- Dynamic rendering
-- Simplified deployment
-- Better performance
-- Built-in optimization
-
-The App Router also allows frontend and backend logic to coexist within a single project while maintaining a clean architecture.
+This chapter explains **why** these technologies were chosen, the trade-offs they introduce, and the problems they solve.
 
 ---
 
-# Why TypeScript?
+## Why Yjs Instead of Traditional Synchronization?
 
-A project of this size involves dozens of interconnected modules.
+The first challenge was enabling multiple developers to edit the same file simultaneously.
 
-Using TypeScript significantly improves maintainability by providing:
+A traditional request-response model or periodically syncing file contents would quickly become unreliable when multiple users edited the same document at once. Conflicts, race conditions, and inconsistent editor states would become common.
 
-- Static type checking
-- Better IDE support
-- Safer refactoring
-- Improved autocomplete
-- Clear API contracts
+Instead, Collab IDE uses **Yjs**, a CRDT-based synchronization framework that allows every participant to edit the same document concurrently while automatically merging changes.
 
-As the application grows, strong typing reduces runtime errors and makes collaboration easier.
+### Why this decision?
 
----
-
-# Why Prisma ORM?
-
-Managing SQL queries manually quickly becomes difficult as projects increase in complexity.
-
-Prisma provides:
-
-- Type-safe queries
-- Schema-driven development
-- Automatic migrations
-- Strong relational modeling
-- Excellent TypeScript integration
-
-Because PostgreSQL is highly relational, Prisma becomes an ideal bridge between the database and application logic.
-
----
-
-# Why PostgreSQL?
-
-Projects naturally contain relationships.
-
-Examples include:
-
-- User → Projects
-- Project → Files
-- Project → Members
-- User → Sessions
-- User → Invitations
-
-Representing these relationships inside a relational database simplifies querying while maintaining consistency.
-
-PostgreSQL also provides:
-
-- ACID compliance
-- Excellent indexing
-- Strong transactional guarantees
-- Mature ecosystem
-- High scalability
-
----
-
-# Why Supabase?
-
-Instead of hosting PostgreSQL independently, Supabase provides:
-
-- Managed database hosting
-- Reliable backups
-- Connection pooling
-- Easy deployment
-- Excellent compatibility with Prisma
-
-Using Supabase reduced operational overhead while allowing development to focus on application features.
-
----
-
-# Why Monaco Editor?
-
-The editor represents the heart of the application.
-
-Rather than creating a custom code editor, Monaco provides the same editing engine used by Visual Studio Code.
-
-Advantages include:
-
-- Familiar interface
-- Language services
-- Syntax highlighting
-- Code folding
-- Multiple cursors
-- Decoration APIs
-- Rich extension support
-
-Using Monaco immediately elevates the editing experience to production-quality standards.
-
----
-
-# Why Yjs?
-
-Collaborative editing is difficult.
-
-Traditional synchronization approaches often rely on Operational Transformation (OT), which becomes increasingly complex as concurrency increases.
-
-Yjs instead uses Conflict-free Replicated Data Types (CRDTs).
-
-Benefits include:
-
+- Conflict-free synchronization
+- Near real-time updates
+- Offline-friendly document model
 - Automatic conflict resolution
-- Eventual consistency
-- Offline editing
-- Low synchronization overhead
-- Deterministic merging
+- Proven collaborative editing architecture
 
-This significantly simplifies collaborative editing while improving reliability.
+### Trade-off
 
----
-
-# Why WebSockets?
-
-HTTP works well for request-response interactions but is inefficient for continuously synchronized applications.
-
-Real-time collaboration requires persistent communication.
-
-WebSockets provide:
-
-- Full duplex communication
-- Low latency
-- Reduced overhead
-- Continuous synchronization
-
-Without WebSockets, collaborative editing would feel slow and disconnected.
+CRDTs introduce additional complexity compared to conventional state management, but they provide the consistency required for collaborative editing.
 
 ---
 
-# Why Docker?
+## Why Docker for Code Execution?
 
-Allowing users to execute arbitrary programs presents major security concerns.
+Allowing users to execute arbitrary code directly on the server presents significant security risks.
 
-Docker isolates every execution request from the application itself.
+Running processes on the host machine would expose the application to malicious code, resource abuse, and unpredictable system behavior.
 
-Each execution environment is:
+Collab IDE isolates every execution request inside Docker containers.
 
-- Temporary
-- Disposable
-- Isolated
-- Independent
+Each execution happens in a controlled environment that is separated from the application itself.
 
-Benefits include:
+### Why this decision?
 
+- Process isolation
 - Improved security
-- Consistent runtime
-- Easy cleanup
-- Better resource isolation
+- Consistent execution environment
+- Easier dependency management
+- Independent lifecycle for user programs
 
-This architecture prevents user programs from affecting the host application.
+### Trade-off
 
----
-
-# Why node-pty?
-
-Interactive terminals require bidirectional communication between browser and operating system processes.
-
-node-pty creates pseudo terminals that behave similarly to native shells.
-
-Advantages include:
-
-- Interactive command execution
-- Continuous output
-- Signal support
-- Familiar terminal behavior
-
-Combined with xterm.js, this produces an experience similar to desktop IDE terminals.
+Container creation introduces additional overhead compared to native execution, but the security and isolation benefits outweigh the performance cost.
 
 ---
 
-# Why xterm.js?
+## Why node-pty Instead of a Simulated Terminal?
 
-Rendering terminal output inside the browser requires more than displaying text.
+A terminal should behave like a real terminal.
 
-xterm.js provides:
+Simple command execution through HTTP requests would remove many of the interactive capabilities developers expect.
 
-- ANSI color support
-- Interactive shell rendering
-- Keyboard shortcuts
-- Scrollback history
-- Cursor control
+Collab IDE uses **node-pty** to create pseudo-terminal sessions that behave similarly to local terminal windows.
 
-This allows developers to use familiar terminal workflows directly inside the application.
+This enables interactive commands, streaming output, and continuous terminal sessions.
+
+### Why this decision?
+
+- Interactive shell support
+- Streaming output
+- Persistent terminal sessions
+- Familiar developer experience
+
+### Trade-off
+
+Managing pseudo-terminal processes requires additional lifecycle management and cleanup compared to simple command execution.
 
 ---
 
-# Why isomorphic-git?
+## Why Separate the Collaboration Server?
 
-Traditional Git relies on native executables installed on the operating system.
+Real-time collaboration has different requirements from standard API requests.
 
-A browser application cannot assume that Git exists on the client.
+Authentication, project management, and database operations follow a request-response model.
 
-isomorphic-git implements Git entirely in JavaScript.
+Collaborative editing requires persistent, low-latency connections that continuously synchronize document state.
 
-Benefits include:
+Separating the collaboration server keeps both responsibilities independent.
 
+### Why this decision?
+
+- Dedicated WebSocket infrastructure
+- Lower synchronization latency
+- Better scalability
+- Separation of responsibilities
+
+### Trade-off
+
+Maintaining multiple services increases deployment complexity but creates a cleaner architecture.
+
+---
+
+## Why PostgreSQL with Prisma?
+
+Projects contain structured relationships between users, members, files, permissions, and workspaces.
+
+A relational database models these relationships naturally while maintaining data integrity.
+
+Prisma provides type-safe database access and simplifies schema evolution.
+
+### Why this decision?
+
+- Relational data modeling
+- Type-safe queries
+- Migration support
+- Strong developer experience
+
+### Trade-off
+
+Relational databases require schema planning, but they provide consistency and maintainability as the project grows.
+
+---
+
+## Why a Custom NextAuth Adapter?
+
+During development, Prisma 7 compatibility with the official NextAuth Prisma Adapter introduced limitations.
+
+Instead of blocking development or downgrading dependencies, Collab IDE implements a custom adapter using raw SQL queries.
+
+This preserved compatibility while maintaining full authentication functionality.
+
+### Why this decision?
+
+- Compatibility with the chosen stack
+- Full control over authentication queries
+- Flexibility during development
+
+### Trade-off
+
+Custom implementations require additional maintenance compared to official adapters.
+
+---
+
+## Why isomorphic-git?
+
+Traditional Git operations depend on a locally installed Git binary.
+
+Collab IDE aims to keep development inside the browser as much as possible.
+
+Using **isomorphic-git** makes browser-friendly Git workflows possible while reducing external dependencies.
+
+### Why this decision?
+
+- JavaScript implementation
 - Browser compatibility
-- Cross-platform consistency
-- Zero external dependencies
-- Easy integration
+- Lightweight integration
+- Easier deployment
 
-This makes Git functionality accessible without leaving the application.
+### Trade-off
 
----
-
-# Why Groq?
-
-AI-assisted development requires low response latency.
-
-Groq's inference platform provides extremely fast completion speeds while maintaining high-quality suggestions.
-
-The model currently integrated into the editor is:
-
-```
-llama-3.3-70b-versatile
-```
-
-The goal is not to replace developers, but to reduce repetitive typing and accelerate common coding tasks.
+Not every advanced Git feature is available compared to the native Git CLI, but the functionality is well suited to the project's workflow.
 
 ---
 
-# Why React Three Fiber?
+## Why Groq for AI Assistance?
 
-The landing page was designed to demonstrate frontend engineering rather than simply advertise the application.
+AI assistance should feel responsive enough to become part of the editing experience.
 
-React Three Fiber enables:
+Fast inference significantly improves usability, especially for inline code suggestions.
 
-- WebGL rendering
-- Interactive scenes
-- Camera animations
-- Shader effects
-- Rich storytelling
+Groq provides low-latency responses that integrate naturally into the development workflow.
 
-Rather than embedding videos, the landing page becomes an interactive experience.
+### Why this decision?
 
----
+- Fast inference
+- Simple API integration
+- Responsive developer experience
 
-# Why GSAP?
+### Trade-off
 
-Smooth animations require more control than standard CSS transitions.
-
-GSAP provides:
-
-- Timeline control
-- ScrollTrigger
-- High-performance animations
-- Sequenced interactions
-- Fine-grained control
-
-This enables cinematic landing page experiences while maintaining smooth performance.
+The quality of responses depends on the selected language model and external API availability.
 
 ---
 
-# Performance Optimizations
+## Why Browser-Native?
 
-Several optimizations have been implemented throughout the project.
+Perhaps the biggest architectural decision was choosing to keep the development experience inside the browser.
 
-## React Server Components
+Rather than treating the browser as a lightweight editor connected to external desktop tools, Collab IDE explores how much of the software development workflow can exist in a single environment.
 
-Server rendering reduces client-side JavaScript while improving initial load times.
-
----
-
-## Dynamic Imports
-
-Heavy components are loaded only when required.
-
-Examples include:
-
-- Monaco
-- React Three Fiber
-- Terminal
-- Large editor modules
+This philosophy influenced every engineering decision throughout the project—from collaboration and execution to Git integration and AI assistance.
 
 ---
 
-## Conditional R3F Mounting
+## Lessons from These Decisions
 
-Instead of merely hiding the WebGL scene on mobile devices, the component is never mounted.
+Every architectural decision introduced trade-offs.
 
-This avoids:
+Some increased implementation complexity.
 
-- WebGL initialization
-- Render loops
-- GPU memory usage
-- Unnecessary JavaScript execution
+Others required additional infrastructure.
 
-This optimization significantly improves mobile performance.
+Some demanded custom solutions where existing integrations were insufficient.
 
----
+However, together they enabled something that a simpler architecture could not provide:
 
-## Efficient Synchronization
+> **A browser-native collaborative development environment where developers can write, execute, manage, and collaborate on code without leaving the workspace.**
 
-Only document updates are transmitted between collaborators.
+The next chapter explores the developer experience, local setup, and project structure for contributors interested in running or extending Collab IDE.
 
-Entire files are never repeatedly synchronized.
+# Developer Guide
 
-This minimizes bandwidth while improving responsiveness.
+Whether you're exploring the codebase, contributing new features, or running the project locally, this chapter provides everything you need to get started.
 
----
-
-## Database Pooling
-
-Supabase's pooling configuration reduces connection overhead in serverless environments.
-
-This is especially important when deploying Next.js applications on Vercel.
-
----
-
-# Security Considerations
-
-Several architectural decisions prioritize security.
-
-These include:
-
-- OAuth authentication
-- Server-side session validation
-- Protected API routes
-- Docker sandbox isolation
-- Temporary execution environments
-- Invitation verification
-- Controlled project membership
-
-Although Collab IDE is primarily an educational project, security considerations were incorporated throughout development rather than treated as an afterthought.
-
----
-
-# Challenges Encountered
-
-Developing Collab IDE required solving a number of engineering challenges.
-
-Some of the most significant included:
-
-- Synchronizing Monaco with Yjs
-- Managing WebSocket state
-- Integrating Docker execution
-- Handling authentication compatibility issues
-- Building browser-native Git workflows
-- Coordinating editor state across collaborators
-- Optimizing Three.js performance
-- Maintaining responsive layouts
-
-Each challenge required researching existing solutions while adapting them to the project's specific architecture.
-
----
-
-# Lessons Learned
-
-Building Collab IDE provided valuable experience in:
-
-- Distributed systems
-- Collaborative editing
-- Authentication
-- Database modeling
-- Containerization
-- API design
-- Performance optimization
-- Frontend architecture
-- State synchronization
-
-More importantly, it demonstrated how multiple independent technologies can be combined into a cohesive developer platform.
-
----
-
-# Looking Forward
-
-The current architecture provides a strong foundation for future expansion.
-
-Potential directions include:
-
-- Branch management
-- Pull request workflows
-- Live pair programming tools
-- Shared debugging sessions
-- Integrated testing pipelines
-- Plugin architecture
-- Workspace templates
-- Team organizations
-
-Because the application has been designed using modular principles, these additions can be implemented without major architectural changes.
-
----
-
-# Getting Started
-
-This section explains how to set up Collab IDE for local development.
-
-The project consists of several independent services working together:
-
-- Next.js application
-- PostgreSQL database
-- WebSocket collaboration server
-- Docker runtime
-- AI provider
-- GitHub OAuth
-
-Before starting the project, ensure all required dependencies are installed and configured.
-
----
-
-# Prerequisites
-
-The following software should already be installed on your machine.
-
-## Required
-
-- Node.js 20+
-- npm
-- Docker Desktop
-- Git
-- PostgreSQL (or Supabase project)
-
----
-
-# Clone the Repository
-
-```bash
-git clone https://github.com/Kaivalyakulkarni/collab-Ide.git
-
-cd collab-Ide
-```
-
----
-
-# Install Dependencies
-
-```bash
-npm install
-```
-
-This installs both application and development dependencies required by the project.
-
----
-
-# Configure Environment Variables
-
-Create a file named
-
-```text
-.env.local
-```
-
-and add the following variables.
-
-```env
-AUTH_SECRET=
-
-AUTH_GITHUB_ID=
-
-AUTH_GITHUB_SECRET=
-
-DATABASE_URL=
-
-DIRECT_URL=
-
-GROQ_API_KEY=
-
-WEBSOCKET_URL=
-```
-
-### Variable Description
-
-| Variable | Purpose |
-|------------|--------------------------------|
-| AUTH_SECRET | NextAuth encryption secret |
-| AUTH_GITHUB_ID | GitHub OAuth Client ID |
-| AUTH_GITHUB_SECRET | GitHub OAuth Secret |
-| DATABASE_URL | PostgreSQL connection string |
-| DIRECT_URL | Direct database connection for Prisma |
-| GROQ_API_KEY | AI completion API |
-| WEBSOCKET_URL | Collaboration server |
-
----
-
-# Database Setup
-
-Push the Prisma schema.
-
-```bash
-npx prisma db push
-```
-
-Seed the initial data.
-
-```bash
-npx prisma db seed
-```
-
-Launch Prisma Studio if required.
-
-```bash
-npx prisma studio
-```
-
----
-
-# Running the Project
-
-Start the development server.
-
-```bash
-npm run dev
-```
-
-The application will be available at
-
-```
-http://localhost:3000
-```
-
----
-
-# Docker
-
-Docker is required for code execution.
-
-Before launching the editor ensure Docker Desktop is running.
-
-Execution will not function if Docker is unavailable.
-
-Each execution request creates an isolated container before running user code.
-
-After execution completes, the container is automatically destroyed.
-
----
-
-# Running the WebSocket Server
-
-Real-time collaboration depends on the WebSocket server.
-
-Start it separately according to your deployment configuration.
-
-The collaboration layer is responsible for:
-
-- Document synchronization
-- Presence
-- Cursor updates
-- CRDT updates
-
-Without this service the editor continues to function, but collaborative editing is disabled.
+The project is organized around clear separation of responsibilities, making it easier to understand how each system works independently while contributing to the overall collaborative experience.
 
 ---
 
 # Project Structure
 
-A simplified overview of the repository is shown below.
-
 ```text
-.
-
-├── app
-│   ├── (auth)
-│   ├── api
-│   ├── dashboard
-│   ├── editor
-│   └── landing
+collab-ide/
 │
-├── components
-│
-├── hooks
-│
-├── lib
-│
-├── prisma
-│
-├── public
-│
-├── styles
-│
-├── types
-│
-├── websocket-server
-│
-└── middleware.ts
+├── app/                  # Next.js App Router
+├── components/           # Reusable UI components
+├── lib/                  # Shared utilities
+├── prisma/               # Database schema & migrations
+├── public/               # Static assets
+├── server/               # API logic & services
+├── websocket/            # Collaboration server
+├── docker/               # Sandbox configuration
+├── styles/               # Global styles
+└── ...
 ```
 
-The repository follows a modular organization where each directory has a clear responsibility.
+The project is intentionally organized by responsibility rather than feature duplication, allowing each system to evolve independently.
 
 ---
 
-# Deployment
+# Technology Stack
 
-The application is designed around a distributed deployment model.
+## Frontend
 
-```text
-                 Users
-
-                   │
-
-                   ▼
-
-              Vercel Frontend
-
-                   │
-
-      ┌────────────┴────────────┐
-
-      ▼                         ▼
-
- Supabase PostgreSQL     Render WebSocket
-
-      │
-
-      ▼
-
- Docker Runtime
-```
-
-Current deployment services include
-
-- Vercel
-- Render
-- Supabase
-- GitHub OAuth
-- Groq
-
-Each service focuses on one responsibility, reducing operational complexity.
-
----
-
-# Browser Compatibility
-
-Collab IDE has been tested with modern browsers supporting:
-
-- WebSockets
-- ES Modules
-- WebGL
-- Service Workers
-
-Recommended browsers include:
-
-- Chrome
-- Edge
-- Firefox
-
----
-
-# Accessibility
-
-Several interface decisions improve accessibility.
-
-Examples include:
-
-- High contrast dark interface
-- Keyboard navigation
-- Large click targets
-- Consistent layouts
-- Readable typography
-
-Future improvements may include expanded screen reader support and additional accessibility preferences.
-
----
-
-# Development Principles
-
-Several principles guided the development process.
-
-## Developer Experience
-
-Every feature should reduce friction during development.
-
----
-
-## Simplicity
-
-Interfaces should expose only the functionality required for common workflows.
-
----
-
-## Modularity
-
-Independent systems should remain loosely coupled.
-
----
-
-## Maintainability
-
-Readable code is preferred over clever implementations.
-
----
-
-## Performance
-
-Heavy components should only load when required.
-
----
-
-## Security
-
-User code should never execute directly on the application server.
-
----
-
-# Major Features Recap
-
-Collab IDE currently includes
-
-- Browser-native IDE
+- Next.js (App Router)
+- React
+- TypeScript
 - Monaco Editor
-- Real-time collaboration
-- CRDT synchronization
-- Docker-backed execution
-- Integrated terminal
-- Git workflows
-- AI code completion
-- GitHub authentication
-- Project dashboard
-- Contributor management
-- Animated landing page
-- Responsive interface
-- PostgreSQL persistence
-
-These systems work together to create a unified collaborative development platform.
+- xterm.js
+- GSAP
+- React Three Fiber
 
 ---
 
-# Future Scope
+## Backend
 
-Although Collab IDE already provides a complete collaborative development environment, several ideas remain possible.
+- Next.js API Routes
+- NextAuth v5
+- Prisma ORM
+- PostgreSQL (Supabase)
 
-Examples include
+---
 
-- Branch management
-- Pull requests
-- Workspace templates
-- Plugin system
-- Live debugging
-- Shared terminals
-- Project analytics
-- Organization support
-- Cloud deployments
-- Code review tools
+## Real-Time Collaboration
 
-The current architecture was intentionally designed so these features can be introduced incrementally.
+- Yjs
+- WebSockets
+- CRDTs
+
+---
+
+## Execution Environment
+
+- Docker
+- node-pty
+
+---
+
+## Developer Tools
+
+- isomorphic-git
+- Groq AI
+
+---
+
+# Getting Started
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/collab-ide.git
+cd collab-ide
+```
+
+---
+
+## 2. Install Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## 3. Configure Environment Variables
+
+Create a `.env` file and configure the required variables.
+
+```env
+DATABASE_URL=
+
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+
+GROQ_API_KEY=
+
+WEBSOCKET_SERVER=
+
+...
+```
+
+---
+
+## 4. Start the Database
+
+Run your PostgreSQL database (or connect to Supabase).
+
+Apply Prisma migrations.
+
+```bash
+npx prisma migrate dev
+```
+
+---
+
+## 5. Start the Collaboration Server
+
+```bash
+npm run websocket
+```
+
+This service synchronizes editor state between connected developers.
+
+---
+
+## 6. Start Docker
+
+Ensure Docker is installed and running before executing user code.
+
+Docker is responsible for creating isolated execution environments.
+
+---
+
+## 7. Start the Development Server
+
+```bash
+npm run dev
+```
+
+The application will be available at:
+
+```text
+http://localhost:3000
+```
+
+---
+
+# Environment Requirements
+
+Before running Collab IDE, make sure the following services are available:
+
+- Node.js
+- Docker
+- PostgreSQL (or Supabase)
+- GitHub OAuth Application
+- Groq API Key
+
+---
+
+# Recommended Development Workflow
+
+1. Create a new project.
+2. Invite collaborators.
+3. Open the shared editor.
+4. Edit files collaboratively.
+5. Execute code inside Docker.
+6. Commit changes.
+7. Continue building together.
+
+Following this workflow provides the best understanding of how the different systems interact.
+
+---
+
+# Project Highlights
+
+The easiest way to experience Collab IDE is to explore the features in the same order they were designed:
+
+1. Authentication
+2. Project Creation
+3. Team Collaboration
+4. Real-Time Editing
+5. Integrated Terminal
+6. Docker Execution
+7. Git Integration
+8. AI Assistance
+
+Each feature builds upon the previous one, gradually forming a complete collaborative development environment.
 
 ---
 
 # Contributing
 
-Contributions are welcome.
+Contributions are always welcome.
 
-If you would like to improve the project:
+Whether you're fixing bugs, improving documentation, refining the user experience, or experimenting with new collaborative features, every contribution helps move the project forward.
+
+If you'd like to contribute:
 
 1. Fork the repository.
-
 2. Create a feature branch.
-
-```bash
-git checkout -b feature/my-feature
-```
-
 3. Commit your changes.
+4. Open a Pull Request.
 
-```bash
-git commit -m "Add new feature"
-```
-
-4. Push your branch.
-
-```bash
-git push origin feature/my-feature
-```
-
-5. Open a Pull Request.
-
-Constructive feedback and issue reports are equally appreciated.
+Please include a clear description of the problem being solved and any relevant implementation details.
 
 ---
 
-# Acknowledgements
+# What's Next?
 
-This project would not have been possible without the open-source community.
+Collab IDE continues to evolve.
 
-Special thanks to the maintainers of:
+Some of the planned improvements include:
 
-- Next.js
-- React
-- Monaco Editor
-- Yjs
-- Prisma
-- PostgreSQL
-- Supabase
-- Docker
-- node-pty
-- xterm.js
-- isomorphic-git
-- NextAuth
-- React Three Fiber
-- GSAP
-- Groq
+- Integrated team chat
+- Voice collaboration
+- Shared debugging sessions
+- Collaborative whiteboard
+- Plugin system
+- Multi-language execution support
+- Smarter AI workflows
+- Improved project management tools
 
-Their work forms the foundation upon which Collab IDE has been built.
+These ideas continue the original mission of making collaborative software development feel natural inside the browser.
 
 ---
 
-# Author
+The final chapter reflects on what this project taught me, the challenges encountered along the way, and the lessons learned while building a browser-native collaborative development environment.
 
-**Kaivalya Kulkarni**
+# Lessons Learned
 
-Electronics & Telecommunication Engineering Student
+Collab IDE started as an experiment in collaborative editing.
 
-Frontend Developer | Full Stack Developer
+The original goal was simple:
 
-GitHub:
+> How can multiple developers work on the same project at the same time without getting in each other's way?
 
-https://github.com/Kaivalyakulkarni
+What began as a real-time editor gradually evolved into a much larger exploration of how modern developer tools interact with each other.
 
-LinkedIn:
+Building the project required understanding not only frontend development, but also distributed systems, synchronization, execution environments, infrastructure, authentication, terminal processes, databases, and developer workflows.
 
-(Add your LinkedIn profile here)
+This chapter reflects on the most important lessons learned throughout that process.
 
 ---
 
-# License
+## Collaboration Is More Than Shared Editing
 
-This project is licensed under the MIT License.
+At the beginning, collaboration seemed like a synchronization problem.
 
-You are free to use, modify, and distribute this software under the terms of the license.
+The assumption was:
 
-See the LICENSE file for complete details.
+> If multiple users can edit the same file simultaneously, collaboration is solved.
+
+In reality, editing is only one part of the workflow.
+
+Developers also need to:
+
+- Run code
+- Debug applications
+- Manage files
+- Track changes
+- Communicate context
+- Coordinate progress
+
+This changed the direction of the project completely.
+
+The editor stopped being the final product and became the foundation for a larger collaborative workspace.
+
+---
+
+## Real-Time Systems Change How You Think
+
+Traditional web applications are mostly request-response driven.
+
+Collaborative systems behave differently.
+
+State changes continuously.
+
+Multiple users interact simultaneously.
+
+Connections stay persistent.
+
+Synchronization becomes part of the application's core architecture rather than an isolated feature.
+
+Building the collaboration layer introduced concepts like:
+
+- CRDTs
+- Shared state synchronization
+- WebSocket communication
+- Presence systems
+- Conflict resolution
+
+Understanding these systems changed how I think about application architecture.
+
+---
+
+## Developer Experience Matters as Much as Functionality
+
+A feature can technically work while still feeling difficult to use.
+
+Small details significantly affect how a development environment feels:
+
+- Terminal responsiveness
+- Editor synchronization speed
+- File navigation
+- Cursor presence
+- Layout organization
+- Workspace transitions
+
+The project reinforced the idea that engineering is not only about implementing systems, but also about reducing friction for the people using them.
+
+---
+
+## Isolation and Security Become Essential Quickly
+
+Allowing users to execute arbitrary code introduces serious responsibility.
+
+Code execution cannot be treated as a normal backend feature.
+
+Containerization, process isolation, and execution boundaries became critical parts of the architecture once the terminal and runtime systems were introduced.
+
+This was one of the biggest shifts in the project:
+
+> Features that appear simple on the surface often require significant infrastructure underneath.
+
+---
+
+## Building Integrated Systems Is Different from Building Individual Features
+
+Many parts of Collab IDE worked independently before they worked together.
+
+The real challenge was integration.
+
+For example:
+
+- The editor needed to synchronize with the collaboration layer.
+- The terminal needed to stay connected to execution containers.
+- Git workflows needed awareness of workspace state.
+- Authentication needed to connect across multiple services.
+
+The complexity came less from individual technologies and more from coordinating systems together reliably.
+
+---
+
+## The Hardest Part Was the Editor Workspace
+
+The editor page became the center of the entire application.
+
+It combined:
+
+- Real-time collaboration
+- File management
+- Terminal integration
+- Execution flow
+- Workspace synchronization
+- Presence systems
+- UI coordination
+
+Building this environment required solving frontend, backend, and infrastructure problems simultaneously.
+
+It was also the part of the project that taught me the most.
+
+---
+
+## The Most Rewarding Moment
+
+The most rewarding moment was seeing multiple cursors editing the same file successfully in real time.
+
+That moment transformed the project from a collection of components into an actual collaborative system.
+
+It was the point where the original idea finally felt real.
+
+---
+
+## What This Project Changed
+
+Before building Collab IDE, I mostly viewed applications as frontend interfaces connected to APIs.
+
+This project changed that perspective.
+
+It demonstrated how professional products are built from multiple specialized systems working together:
+
+- Collaboration infrastructure
+- Execution environments
+- Databases
+- Networking layers
+- Authentication systems
+- Developer tooling
+
+It also reinforced the importance of architecture decisions early in development.
+
+---
+
+## Future Direction
+
+Collab IDE is still evolving.
+
+Some of the ideas I want to continue exploring include:
+
+- Integrated editor chat
+- Shared debugging sessions
+- Voice collaboration
+- AI-aware collaboration
+- Multi-user terminals
+- Persistent collaborative workspaces
+
+The goal remains the same as when the project started:
+
+> Creating a browser-native environment where developers can build software together naturally.
 
 ---
 
 # Final Thoughts
 
-Collab IDE represents the culmination of extensive experimentation across frontend engineering, backend architecture, distributed systems, collaborative editing, containerization, artificial intelligence, and modern web development.
+Collab IDE was never intended to replicate professional cloud IDEs feature-for-feature.
 
-Rather than focusing on a single technology, the project explores how multiple specialized systems can work together to create an integrated browser-native development environment.
+The project was built as an exploration of collaborative software development and the systems required to support it.
 
-From conflict-free collaborative editing and secure Docker-based code execution to AI-assisted programming and browser-native Git workflows, every subsystem was designed with the goal of delivering an experience that feels familiar to developers while remaining entirely web-based.
+Every challenge introduced new areas of engineering to learn—from synchronization and infrastructure to security and developer experience.
 
-The project also reflects an emphasis on thoughtful engineering decisions over convenience. Technologies were selected based on architectural requirements, scalability, developer experience, and long-term maintainability rather than popularity alone.
+More than anything, the project taught me how modern engineering products are designed:
 
-Collab IDE continues to evolve, serving both as a practical development platform and as a demonstration of modern full-stack software engineering practices.
+not as isolated features,
 
-Thank you for taking the time to explore the project.
+but as connected systems working together to solve a real workflow problem.
+
+---
+
+## Built for Collaboration.
+## Engineered for Developers.
+
+
+---
+
+# Explore Collab IDE
+
+If you've made it this far, thank you for taking the time to explore the project.
+
+Collab IDE began as a question about collaborative editing and gradually evolved into an exploration of what a complete browser-native development environment could look like.
+
+Whether you're here to review the architecture, learn from the implementation, or contribute to the project, I hope this documentation gave you a clear understanding of both the product and the engineering decisions behind it.
+
+---
+
+## Try It Yourself
+
+🌐 **Live Demo**
+
+Experience real-time collaboration directly in your browser.
+
+> [Live Demo](https://collab-ide-nine.vercel.app)
+
+---
+
+## Explore the Code
+
+Interested in the implementation?
+
+Browse the source code, architecture, and project history.
+
+> [GitHub Repository](https://github.com/Kaivalyakulkarni/collab-Ide)
+
+---
+
+## Connect With Me
+
+If you have feedback, suggestions, or simply want to discuss the project, I'd love to hear from you.
+
+- GitHub: https://github.com/Kaivalyakulkarni
+- LinkedIn: https://linkedin.com/in/...
+- Email: your@email.com
+
+---
+
+<p align="center">
+
+Built with by **Kaivalya Kulkarni**
+
+**Built for Collaboration. Engineered for Developers.**
+
+</p>
