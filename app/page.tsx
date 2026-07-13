@@ -313,9 +313,9 @@ function HeroSection() {
     <>
       <style>{`
         .hero-wrap * { box-sizing: border-box;}
-        .hero-wrap { font-family: 'Inter', sans-serif; color: #f5f5f4; width:100%; height:100%; }
-        .hero-wrap p { font-family: 'JetBrains Mono', monospace; }
-        .hero-wrap h1 { font-family: 'Inter', sans-serif; }
+        .hero-wrap { font-family: var(--font-geist-pixel-circle); color: #f5f5f4; width:100%; height:100%; }
+        .hero-wrap p { font-family: var(--font-geist-sans); font-weight:400; }
+        .hero-wrap h1 { font-family: var(--font-geist-pixel-circle); font-weight:500; }
         #cursor-dot {
           position: fixed; top:0; left:0; width:12px; height:12px; border-radius:50%;
           background:#F5A623; pointer-events:none; z-index:9999;
@@ -824,75 +824,77 @@ function FakeDashboard() {
 // ============================================================
 
 function FakeTerminal() {
-    const lines = [
-        { text: "/tmp/workspace # docker run node:18-alpine", color: "#5fbf77", delay: 0 },
-        { text: "Unable to find image 'node:18-alpine' locally", color: "#7F8C8D", delay: 800 },
-        { text: "18-alpine: Pulling from library/node", color: "#7F8C8D", delay: 1400 },
-        { text: "✓ Pull complete", color: "#22C55E", delay: 2200 },
-        { text: "/tmp/workspace # node filename.ts", color: "#5fbf77", delay: 3000 },
-        { text: "Sum: 30", color: "#ECF0F1", delay: 3800 },
-        { text: "Result: 30", color: "#ECF0F1", delay: 4200 },
-        { text: "/tmp/workspace # _", color: "#5fbf77", delay: 5000 },
-    ];
+  const lines = [
+    { text: "/tmp/workspace # docker run node:18-alpine", color: "#5fbf77", delay: 0 },
+    { text: "Unable to find image 'node:18-alpine' locally", color: "#7F8C8D", delay: 800 },
+    { text: "18-alpine: Pulling from library/node", color: "#7F8C8D", delay: 1400 },
+    { text: "✓ Pull complete", color: "#22C55E", delay: 2200 },
+    { text: "/tmp/workspace # node filename.ts", color: "#5fbf77", delay: 3000 },
+    { text: "Sum: 30", color: "#ECF0F1", delay: 3800 },
+    { text: "Result: 30", color: "#ECF0F1", delay: 4200 },
+    { text: "/tmp/workspace # _", color: "#5fbf77", delay: 5000 },
+  ];
 
-    const [visibleLines, setVisibleLines] = useState(0);
+  const [visibleLines, setVisibleLines] = useState(0);
 
-    useEffect(() => {
-        setVisibleLines(0);
-        const timeouts = lines.map((_, i) =>
-            setTimeout(() => setVisibleLines(i + 1), lines[i].delay)
-        );
-        return () => timeouts.forEach(clearTimeout);
-    }, []);
-
-    return (
-        <div style={{
-            width: "680px", background: "#000",
-            border: "1px solid #1a1a1a", borderRadius: "10px",
-            overflow: "hidden", fontFamily: "'JetBrains Mono', monospace",
-            boxShadow: "0 0 80px rgba(34,197,94,0.1), 0 30px 60px rgba(0,0,0,0.7)",
-        }}>
-            {/* title bar */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderBottom: "1px solid #1a1a1a", background: "#0a0a0a" }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
-                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
-                <span style={{ marginLeft: 12, fontSize: 11, color: "#7F8C8D" }}>terminal — /tmp/workspace</span>
-                <span style={{ marginLeft: "auto", fontSize: 10, color: "#22C55E", display: "flex", alignItems: "center", gap: 5 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 6px #22C55E" }} />
-                    docker · node:18-alpine
-                </span>
-            </div>
-
-            {/* terminal output */}
-            <div style={{ padding: "16px", minHeight: 260 }}>
-                {lines.slice(0, visibleLines).map((line, i) => (
-                    <div key={i} style={{
-                        fontSize: 12, color: line.color,
-                        lineHeight: 1.8, whiteSpace: "pre",
-                    }}>
-                        {line.text}
-                        {/* blinking cursor on last visible line */}
-                        {i === visibleLines - 1 && i === lines.length - 1 && (
-                            <span style={{
-                                display: "inline-block", width: 8, height: 13,
-                                background: "#5fbf77", marginLeft: 2,
-                                verticalAlign: "middle",
-                                animation: "cursorBlink 0.8s steps(2) infinite",
-                            }} />
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
+  useEffect(() => {
+    setVisibleLines(0);
+    const timeouts = lines.map((_, i) =>
+      setTimeout(() => setVisibleLines(i + 1), lines[i].delay)
     );
+    return () => timeouts.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div style={{
+      width: "680px", background: "#000",
+      border: "1px solid #1a1a1a", borderRadius: "10px",
+      overflow: "hidden", fontFamily: "'JetBrains Mono', monospace",
+      boxShadow: "0 0 80px rgba(34,197,94,0.1), 0 30px 60px rgba(0,0,0,0.7)",
+    }}>
+      {/* title bar */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderBottom: "1px solid #1a1a1a", background: "#0a0a0a" }}>
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
+        <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
+        <span style={{ marginLeft: 12, fontSize: 11, color: "#7F8C8D" }}>terminal — /tmp/workspace</span>
+        <span style={{ marginLeft: "auto", fontSize: 10, color: "#22C55E", display: "flex", alignItems: "center", gap: 5 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22C55E", boxShadow: "0 0 6px #22C55E" }} />
+          docker · node:18-alpine
+        </span>
+      </div>
+
+      {/* terminal output */}
+      <div style={{ padding: "16px", minHeight: 260 }}>
+        {lines.slice(0, visibleLines).map((line, i) => (
+          <div key={i} style={{
+            fontSize: 12, color: line.color,
+            lineHeight: 1.8, whiteSpace: "pre",
+          }}>
+            {line.text}
+            {/* blinking cursor on last visible line */}
+            {i === visibleLines - 1 && i === lines.length - 1 && (
+              <span style={{
+                display: "inline-block", width: 8, height: 13,
+                background: "#5fbf77", marginLeft: 2,
+                verticalAlign: "middle",
+                animation: "cursorBlink 0.8s steps(2) infinite",
+              }} />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // ============================================================
 // PANEL: CTA (Section 4)
 // ============================================================
 
-function FakeCTA() {
+function FakeCTA({ isLoggedIn }: { isLoggedIn: boolean }) {
+
+
   return (
     <div style={{
       width: "580px", textAlign: "center", fontFamily: "'JetBrains Mono', monospace",
@@ -905,7 +907,7 @@ function FakeCTA() {
       <div style={{ fontSize: 13, color: "#7F8C8D", maxWidth: 400, lineHeight: 1.7 }}>
         No setup. No local installs. Just open a tab and start collaborating.
       </div>
-      <a href="https://collab-ide-nine.vercel.app" target="_blank" rel="noreferrer" style={{
+      <a href={isLoggedIn ? "/dashboard" : "/api/auth/signin"} target="_blank" rel="noreferrer" style={{
         background: "#F59E0B", color: "#1a1206", fontFamily: "'JetBrains Mono', monospace",
         fontWeight: 700, fontSize: 14, padding: "14px 32px", borderRadius: 8,
         border: "none", cursor: "pointer", textDecoration: "none",
@@ -924,7 +926,8 @@ function FakeCTA() {
 // WORKSPACE SCENE — switches panel based on activeSection
 // ============================================================
 
-function WorkspaceScene({ activeSection }: { activeSection: number }) {
+function WorkspaceScene({ activeSection, isLoggedIn }: { activeSection: number; isLoggedIn: boolean }) {
+
   const wobbleRef = useRef<THREE.Group>(null!);
 
   const [panelVisible, setPanelVisible] = useState(true);
@@ -956,7 +959,7 @@ function WorkspaceScene({ activeSection }: { activeSection: number }) {
     if (activeSection === 1) return <FakeEditor />;
     if (activeSection === 2) return <FakeDashboard />;
     if (activeSection === 3) return <FakeTerminal />;
-    if (activeSection === 4) return <FakeCTA />;
+    if (activeSection === 4) return <FakeCTA isLoggedIn={isLoggedIn} />;
     // default
   };
 
@@ -1073,7 +1076,7 @@ function ScrollSection({ heightVh, children }: { heightVh: number; children: Rea
 
   return (
     <div ref={sectionRef} style={{ height: `${heightVh}vh`, position: "relative" }}>
-      <div ref={contentRef} style={{ position: "fixed", inset: 0, opacity: 0 }}>
+      <div ref={contentRef} style={{ position: "fixed", inset: 0, opacity: 0  ,pointerEvents: "none"}}>
         {children}
       </div>
     </div>
@@ -1091,27 +1094,27 @@ const SECTIONS: {
   heading: React.ReactNode;
   description: string;
 }[] = [
-  {
-    label: "// feature_01",
-    heading: <>Real-time<br />multiplayer editing</>,
-    description: "Multiple developers editing the same file simultaneously — powered by Yjs CRDTs with colored cursors per user.",
-  },
-  {
-    label: "// feature_02",
-    heading: <>Project dashboard<br />& collaboration</>,
-    description: "Manage projects, invite collaborators, track files and leave threaded comments — all in one place.",
-  },
-  {
-    label: "// feature_03",
-    heading: "Sandboxed terminal & Docker execution",
-    description: "Run code in isolated Docker containers directly from the browser. No local setup required.",
-  },
-  {
-    label: "// initialize your First Project",
-    heading: <>Ready to ship<br /><span style={{ color: "#F59E0B" }}>from the cloud?</span></>,
-    description: "No setup. No local installs. Just open a tab and start collaborating.",
-  },
-];
+    {
+      label: "// feature_01",
+      heading: <>Real-time<br />multiplayer editing</>,
+      description: "Multiple developers editing the same file simultaneously — powered by Yjs CRDTs with colored cursors per user.",
+    },
+    {
+      label: "// feature_02",
+      heading: <>Project dashboard & collaboration</>,
+      description: "Manage projects, invite collaborators, track files and leave threaded comments — all in one place.",
+    },
+    {
+      label: "// feature_03",
+      heading: <>Sandboxed <br /> terminal & <br /> Docker execution</>,
+      description: "Run code in isolated Docker containers directly from the browser. No local setup required.",
+    },
+    {
+      label: "// initialize your First Project",
+      heading: <>Ready to ship<br /><span style={{ color: "#F59E0B" }}>from the cloud?</span></>,
+      description: "No setup. No local installs. Just open a tab and start collaborating.",
+    },
+  ];
 
 // Section text overlays — left/right side narrative text per section
 function Section1Text() {
@@ -1120,7 +1123,7 @@ function Section1Text() {
     <ScrollSection heightVh={150}>
       <div style={{ position: "absolute", left: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 340 }}>
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
-        <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(2rem,4vw,4rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
+        <h2 style={{ fontFamily: "var(--font-geist-pixel-circle)", fontWeight: 500, fontSize: "clamp(3rem,5vw,5rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
           {s.heading}
         </h2>
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#a4b4b5", lineHeight: 1.8 }}>
@@ -1137,7 +1140,7 @@ function Section2Text() {
     <ScrollSection heightVh={150}>
       <div style={{ position: "absolute", right: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 340, textAlign: "right" }}>
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
-        <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(2rem,4vw,2.8rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
+        <h2 style={{ fontFamily: "var(--font-geist-pixel-circle)", fontWeight: 500, fontSize: "clamp(2rem,4.5vw,5rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
           {s.heading}
         </h2>
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#7F8C8D", lineHeight: 1.8 }}>
@@ -1154,7 +1157,7 @@ function Section3Text() {
     <ScrollSection heightVh={150}>
       <div style={{ position: "absolute", left: 48, top: "70%", transform: "translateY(-50%)", maxWidth: 440 }}>
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
-        <h2 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, fontSize: "clamp(1.8rem,4vw,2.8rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
+        <h2 style={{ fontFamily: "var(--font-geist-pixel-circle)", fontWeight: 500, fontSize: "clamp(2rem,4vw,5rem)", color: "#ECF0F1", lineHeight: 1.1, marginBottom: 16 }}>
           {s.heading}
         </h2>
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#7F8C8D", lineHeight: 1.8 }}>
@@ -1169,8 +1172,8 @@ function Section4Text() {
   const s = SECTIONS[3];
   return (
     <ScrollSection heightVh={150}>
-      <div style={{ position: "absolute", right: 530, top: "80%", transform: "translateY(-50%)", maxWidth: 340, textAlign: "center" }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
+      <div style={{ position: "absolute", right: 556, top: "80%", transform: "translateY(-50%)", maxWidth: 340, textAlign: "center", fontFamily: "var(--font-geist-pixel-circle)", fontWeight: 500 }}>
+        <div style={{ fontSize: 11, color: "#F59E0B", marginBottom: 12 }}>{s.label}</div>
       </div>
     </ScrollSection>
   );
@@ -1262,8 +1265,10 @@ function MobileTerminalPanel() {
 }
 
 function MobileCTAPanel() {
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
   return (
-    <a href="https://collab-ide-nine.vercel.app" target="_blank" rel="noreferrer" style={{
+    <a href={isLoggedIn ? "/dashboard" : "/api/auth/signin"} target="_blank" rel="noreferrer" style={{
       display: "block", width: "100%", textAlign: "center",
       background: "#F59E0B", color: "#1a1206", fontFamily: "'JetBrains Mono', monospace",
       fontWeight: 700, fontSize: 14, padding: "14px 0", borderRadius: 8,
@@ -1292,7 +1297,7 @@ function MobileWorkspace() {
               {s.label}
             </div>
             <h2 style={{
-              fontFamily: "'Inter', sans-serif", fontWeight: 800,
+              fontFamily: "var(--font-geist-pixel-circle)", fontWeight: 500,
               fontSize: "clamp(1.7rem, 7vw, 2.3rem)", color: "#ECF0F1", lineHeight: 1.15,
             }}>
               {s.heading}
@@ -1606,6 +1611,8 @@ export default function Page() {
   const TOTAL_SECTIONS = 9;
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
 
   // ← lifted state
   const [activeSection, setActiveSection] = useState(0);
@@ -1707,7 +1714,7 @@ export default function Page() {
                 <pointLight position={[3, 2, 4]} intensity={25} color="#F59E0B" />
                 <pointLight position={[-4, -2, -2]} intensity={10} color="#6366F1" />
                 <CameraRig />
-                <WorkspaceScene activeSection={activeSection} />
+                <WorkspaceScene activeSection={activeSection} isLoggedIn={isLoggedIn} />
                 <Atmosphere />
                 <EffectComposer>
                   <Bloom intensity={0.6} luminanceThreshold={0.2} luminanceSmoothing={0.9} mipmapBlur />
