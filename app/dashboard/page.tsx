@@ -188,9 +188,7 @@ export default function Dashboard() {
                             {`${session.user?.name}_dev`}
                         </a>
 
-                        <button className={styles.btnFunc} style={{ background: "#BDC3C7", color: "#000", padding: "5px 14px", borderRadius: "4px", fontSize: "12px", fontWeight: "600", border: "none", cursor: "pointer" }} onClick={() => setShowModal(true)}>
-                            + new_project()
-                        </button>
+                        
                     </div>
                 </div>
             </nav>

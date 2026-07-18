@@ -194,13 +194,10 @@ export default function ProjectDetailsPage() {
                         {/* buttons */}
                         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "14px" }}>
 
-                            <button className={style.btnOutline} onClick={() => router.push(`/projects/${projectId}/new-issue`)}>
-                                + new_issue()
-                            </button>
-
-                            <button className={styles.btnFunc} style={{ background: "#BDC3C7", color: "#000", padding: "5px 14px", borderRadius: "4px", fontSize: "10px", fontWeight: "600", border: "none", cursor: "pointer" }} onClick={() => router.push(`/editor/${projectId}`)}>
-                                + open_in_ide()
-                            </button>
+                            <a href="#" className=" text-[13px] lowercase text-gray-500 flex gap-2 items-center" style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}>
+                                <div className="w-6 h-6 rounded-full bg-zinc-900 text-center flex items-center justify-center px-4 py-4 uppercase text-green-600 text-[12px] font-bold">{`${initial}`}</div>
+                                {`${session.user?.name}_dev`}
+                            </a>
 
                         </div>
                     </div>
