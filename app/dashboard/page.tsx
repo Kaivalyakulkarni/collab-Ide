@@ -1067,13 +1067,12 @@ export default function Dashboard() {
             </>
           )}
         </main>
+
         {/* Mobile bottom nav island */}
         <div className={style.mobileNavIsland}>
           <button
             onClick={() => setActivePanel("overview")}
-            className={`${style.mobileNavItem} ${
-              activePannel === "overview" ? style.mobileNavItemActive : ""
-            }`}
+            className={`${style.mobileNavItem} ${activePannel === "overview" ? style.mobileNavItemActive : ""}`}
           >
             <svg
               fill="none"
@@ -1090,18 +1089,8 @@ export default function Dashboard() {
           </button>
 
           <button
-            onClick={() => setShowModal(true)}
-            className={style.mobileNavFab}
-            aria-label="Create Project"
-          >
-            +
-          </button>
-
-          <button
             onClick={() => setActivePanel("projects")}
-            className={`${style.mobileNavItem} ${
-              activePannel === "projects" ? style.mobileNavItemActive : ""
-            }`}
+            className={`${style.mobileNavItem} ${activePannel === "projects" ? style.mobileNavItemActive : ""}`}
           >
             <svg
               fill="none"
@@ -1115,12 +1104,20 @@ export default function Dashboard() {
                 d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
               />
             </svg>
-
             {totalProjects > 0 && (
               <span className={style.mobileNavBadge}>{totalProjects}</span>
             )}
           </button>
         </div>
+
+        {/* FAB — sibling of the island, sits independently on top of the notch */}
+        <button
+          onClick={() => setShowModal(true)}
+          className={style.mobileNavFab}
+          aria-label="Create Project"
+        >
+          +
+        </button>
       </div>
       {/* Status-Bar */}
       <div

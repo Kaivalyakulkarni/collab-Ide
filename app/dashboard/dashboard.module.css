@@ -657,7 +657,6 @@
   color: #ecf0f1;
   flex: 1;
   appearance: none;
-  /* ← add this */
   cursor: pointer;
 }
 
@@ -742,9 +741,13 @@
 }
 
 /* ==================== */
-/* MOBILE BOTTOM NAV ISLAND */
+/* MOBILE BOTTOM NAV ISLAND (base / desktop-hidden state) */
 /* ==================== */
 .mobileNavIsland {
+  display: none;
+}
+
+.mobileNavFab {
   display: none;
 }
 
@@ -754,13 +757,14 @@
   align-items: flex-end;
 }
 
+/* ==================== */
+/* MOBILE BREAKPOINT — single consolidated block */
+/* ==================== */
 @media (max-width: 768px) {
   .navTabs {
     display: none;
   }
-}
 
-@media (max-width: 768px) {
   .sideBar {
     display: none;
   }
@@ -770,9 +774,10 @@
   }
 
   .main {
-    padding: 24px 20px 120px;
+    padding: 32px 20px 130px;
   }
 
+  /* --- bottom nav island --- */
   .mobileNavIsland {
     position: fixed;
     left: 50%;
@@ -803,34 +808,32 @@
       0 12px 40px rgba(0, 0, 0, 0.35),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
 
-    overflow: visible;
+    mask-image: radial-gradient(36px at 50% 15px, transparent 99%, #000 100%);
+    -webkit-mask-image: radial-gradient(
+      36px at 50% 15px,
+      transparent 99%,
+      #000 100%
+    );
   }
 
   .mobileNavItem {
     width: 42px;
     height: 42px;
-
     border: none;
     background: transparent;
-
     border-radius: 50%;
-
     display: flex;
     justify-content: center;
     align-items: center;
-
     color: #8c8c8c;
-
     cursor: pointer;
-
     transition: 0.25s;
-
     position: relative;
   }
 
   .mobileNavItem svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
   .mobileNavItem:hover {
@@ -839,67 +842,60 @@
   }
 
   .mobileNavItemActive {
-    color: white;
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  .mobileNavItem svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .mobileNavItemActive {
     background: rgba(189, 195, 199, 0.12);
     color: #bdc3c7;
   }
 
   .mobileNavBadge {
-        position: absolute;
-        top: 2px;
-        right: 0px;
-        background: #BDC3C7;
-        color: #000;
-        font-size: 8px;
-        font-weight: 700;
-        padding: 0 4px;
-        border-radius: 8px;
-        line-height: 1.4;
-    }
+    position: absolute;
+    top: 2px;
+    right: 0px;
+    background: #bdc3c7;
+    color: #000;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 0 4px;
+    border-radius: 8px;
+    line-height: 1.4;
+  }
 
+  /* --- FAB — nested into the island's notch --- */
   .mobileNavFab {
-        position: fixed;
-        left: 50%;
-        bottom: 18px;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: #BDC3C7;
-        color: #000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 26px;
-        font-weight: 700;
-        z-index: 62;
-        box-shadow: 0 4px 16px rgba(189, 195, 199, 0.4);
-        border: none;
-        cursor: pointer;
-    }
+    display: flex;
+    position: fixed;
+    left: 50%;
+    bottom: 36px;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #bdc3c7;
+    color: #000;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    z-index: 101;
+    box-shadow: 0 6px 20px rgba(189, 195, 199, 0.45);
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
 
   .mobileNavFab:hover {
-    transform: translate(-50%, -22%) scale(1.05);
+    transform: translateX(-50%) scale(1.05);
   }
 
   .mobileNavFab:active {
-    transform: translate(-50%, -18%) scale(0.95);
+    transform: translateX(-50%) scale(0.94);
   }
 
+  /* --- header / greeting --- */
   .dashboardHeader {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: 20px;
+    margin-bottom: 28px;
   }
 
   .headerActions {
@@ -912,26 +908,75 @@
 
   .greetingName {
     font-size: 26px;
+    margin-bottom: 10px;
   }
 
+  .greeting {
+    margin-bottom: 10px;
+  }
+
+  .greetingSub {
+    line-height: 1.6;
+  }
+
+  /* --- stats --- */
   .statRow {
     grid-template-columns: repeat(2, 1fr);
-    margin-bottom: 32px;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    margin-bottom: 28px;
   }
 
   .statCard {
-    padding: 16px;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 18px 16px;
+  }
+
+  .statLabel {
+    margin-bottom: 8px;
   }
 
   .statValue {
     font-size: 20px;
   }
 
+  /* --- section headers --- */
+  .sectionHeader {
+    margin-bottom: 16px;
+    margin-top: 8px;
+  }
+
+  /* --- project grid/cards --- */
   .projectGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
+    background: transparent;
+    border: none;
     margin-bottom: 32px;
   }
 
+  .projectCard {
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .projectCardHeader {
+    margin-bottom: 12px;
+  }
+
+  .projectDesc {
+    margin-bottom: 16px;
+  }
+
+  /* --- activity --- */
+  .activityItem {
+    padding: 14px 16px;
+  }
+
+  /* --- settings --- */
   .settingItem {
     flex-direction: column;
     align-items: flex-start;
@@ -942,6 +987,7 @@
     width: 100%;
   }
 
+  /* --- search --- */
   .searchBar {
     margin-bottom: 24px;
   }
