@@ -409,7 +409,9 @@
         padding: 24px 20px 130px;
     }
 
-    
+    .headerActions{
+        display: none;
+    }
 
     /* --- bottom nav island --- */
     .mobileNavIsland {

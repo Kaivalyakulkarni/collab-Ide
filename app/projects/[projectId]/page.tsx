@@ -443,7 +443,9 @@ export default function ProjectDetailsPage() {
                 style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}
               >
                 <div className="w-6 h-6 rounded-full bg-zinc-900 text-center flex items-center justify-center px-4 py-4 uppercase text-green-600 text-[12px] font-bold">{`${initial}`}</div>
-                <span className={style.mobileName}>{`${session.user?.name}_dev`}</span>
+                <span
+                  className={style.mobileName}
+                >{`${session.user?.name}_dev`}</span>
               </a>
             </div>
           </div>
@@ -637,20 +639,50 @@ export default function ProjectDetailsPage() {
                   </div>
                   <div className={style.headerActions}>
                     <button
-                      className={styles.btnFunc}
+                      onClick={() => router.push(`/editor/${projectId}`)}
                       style={{
-                        background: "#BDC3C7",
-                        color: "#000",
-                        padding: "5px 14px",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        background: "#f59e0b",
+                        color: "#1a1206",
+                        padding: "12px 26px",
+                        borderRadius: "999px",
+                        fontSize: "14px",
+                        fontWeight: "700",
                         border: "none",
                         cursor: "pointer",
+                        fontFamily: "var(--font-jetbrains-mono), monospace",
+                        boxShadow: "0 6px 20px rgba(245, 158, 11, 0.35)",
+                        transition:
+                          "transform 0.15s ease, box-shadow 0.15s ease",
                       }}
-                      onClick={() => router.push(`/editor/${projectId}`)}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "scale(1.03)";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 24px rgba(245, 158, 11, 0.45)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "scale(1)";
+                        e.currentTarget.style.boxShadow =
+                          "0 6px 20px rgba(245, 158, 11, 0.35)";
+                      }}
                     >
-                      + open_in_ide()
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M8 9l-3 3 3 3m8-6l3 3-3 3m-6 3l4-12"
+                        />
+                      </svg>
+                      open_in_ide()
                     </button>
                   </div>
                 </div>
