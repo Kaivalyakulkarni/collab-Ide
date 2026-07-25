@@ -373,3 +373,221 @@
     border-radius: 50%;
     background: #4ade80;
 }
+
+/* ==================== */
+/* MOBILE NAV EXTRAS (base state, overridden at breakpoint) */
+/* ==================== */
+.mobileNavIsland {
+    display: none;
+}
+
+.mobileNavFab {
+    display: none;
+}
+
+.mobileRoleBadge {
+    display: none;
+}
+
+.mobileBreadcrumb {
+    display: flex;
+}
+
+/* ==================== */
+/* MOBILE BREAKPOINT */
+/* ==================== */
+@media (max-width: 768px) {
+    .sideBar {
+        display: none;
+    }
+
+    .statusbar {
+        display: none;
+    }
+
+    .main {
+        padding: 24px 20px 130px;
+    }
+
+    
+
+    /* --- bottom nav island --- */
+    .mobileNavIsland {
+        display: flex;
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%);
+        width: 220px;
+        height: 64px;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0 20px;
+        background: rgba(20, 20, 20, 0.72);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        z-index: 100;
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        mask-image: radial-gradient(36px at 50% 15px, transparent 99%, #000 100%);
+        -webkit-mask-image: radial-gradient(36px at 50% 15px, transparent 99%, #000 100%);
+    }
+
+    .mobileNavItem {
+        width: 44px;
+        height: 44px;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #8c8c8c;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+    }
+
+    .mobileNavItem svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .mobileNavItem:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mobileNavItemActive {
+        background: rgba(189, 195, 199, 0.12);
+        color: #BDC3C7;
+    }
+
+    .mobileNavBadge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: #BDC3C7;
+        color: #000;
+        font-size: 8px;
+        font-weight: 700;
+        padding: 0 4px;
+        border-radius: 8px;
+        line-height: 1.4;
+    }
+
+    /* --- FAB — open_in_ide(), sits in the island's notch --- */
+    .mobileNavFab {
+        display: flex;
+        position: fixed;
+        left: 50%;
+        bottom: 36px;
+        transform: translateX(-50%);
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #f59e0b;
+        color: #000;
+        align-items: center;
+        justify-content: center;
+        z-index: 101;
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+        border: none;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+    }
+
+    .mobileNavFab svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .mobileNavFab:hover {
+        transform: translateX(-50%) scale(1.05);
+    }
+
+    .mobileNavFab:active {
+        transform: translateX(-50%) scale(0.94);
+    }
+
+    /* --- top nav adjustments --- */
+    .mobileRoleBadge {
+        display: block;
+    }
+
+    .mobileBreadcrumb {
+        display: none;
+    }
+
+    .mobileName{
+        display: none;
+    }
+
+    /* --- header --- */
+    .projectHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .headerActions {
+        width: 100%;
+    }
+
+    .headerActions button {
+        flex: 1;
+    }
+
+    .projectTitle {
+        font-size: 20px;
+    }
+
+    .projectIconLg {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+    }
+
+    /* --- stats --- */
+    .statRow {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        background: transparent;
+        border: none;
+        margin-bottom: 24px;
+    }
+
+    .statCard {
+        border: 1px solid #1a1a1a;
+        border-radius: 8px;
+        padding: 14px;
+    }
+
+    .statValue {
+        font-size: 18px;
+    }
+
+    /* --- stack file tree + collaborators panels --- */
+    .contentGrid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .panelHeader {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 16px;
+    }
+
+    .fileRow {
+        padding: 10px 16px;
+    }
+
+    .fileMsg {
+        display: none;
+    }
+}

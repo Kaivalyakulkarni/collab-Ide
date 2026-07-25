@@ -337,8 +337,9 @@ export default function ProjectDetailsPage() {
             <div
               style={{
                 display: "flex",
-                alignItems: "center",
-                gap: "24px",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                justifyContent: "center",
                 height: "100%",
               }}
             >
@@ -390,9 +391,11 @@ export default function ProjectDetailsPage() {
               </span>
               {/* Breadcrumb */}
               <span
+                className={style.mobileBreadcrumb}
                 style={{
                   display: "flex",
                   alignItems: "center",
+                  marginLeft: "25px",
                   gap: "8px",
                   fontFamily: "monospace",
                   fontSize: ".7rem",
@@ -409,16 +412,38 @@ export default function ProjectDetailsPage() {
                 marginLeft: "auto",
                 display: "flex",
                 alignItems: "center",
-                gap: "14px",
+                gap: "10px",
               }}
             >
+              {myRole && (
+                <div
+                  className={style.mobileRoleBadge}
+                  style={{
+                    background:
+                      myRole === "OWNER"
+                        ? "rgba(189,195,199,0.1)"
+                        : myRole === "EDITOR"
+                          ? "rgba(96,165,250,0.1)"
+                          : "rgba(127,140,141,0.15)",
+                    color:
+                      myRole === "OWNER"
+                        ? "#BDC3C7"
+                        : myRole === "EDITOR"
+                          ? "#60a5fa"
+                          : "#7F8C8D",
+                    display: "none",
+                  }}
+                >
+                  {myRole}
+                </div>
+              )}
               <a
                 href="#"
                 className=" text-[13px] lowercase text-gray-500 flex gap-2 items-center"
                 style={{ fontFamily: "var(--font-jetbrains-mono),monospace" }}
               >
                 <div className="w-6 h-6 rounded-full bg-zinc-900 text-center flex items-center justify-center px-4 py-4 uppercase text-green-600 text-[12px] font-bold">{`${initial}`}</div>
-                {`${session.user?.name}_dev`}
+                <span className={style.mobileName}>{`${session.user?.name}_dev`}</span>
               </a>
             </div>
           </div>
@@ -611,15 +636,6 @@ export default function ProjectDetailsPage() {
                     </div>
                   </div>
                   <div className={style.headerActions}>
-                    <button
-                      className={style.btnOutline}
-                      onClick={() =>
-                        router.push(`/projects/${projectId}/new-issue`)
-                      }
-                    >
-                      + new_issue()
-                    </button>
-
                     <button
                       className={styles.btnFunc}
                       style={{
@@ -1823,6 +1839,92 @@ export default function ProjectDetailsPage() {
               </>
             )}
           </main>
+          {/* Mobile bottom nav island */}
+          <div className={style.mobileNavIsland}>
+            <button
+              onClick={() => setActivePanel("projectDashboard")}
+              className={`${style.mobileNavItem} ${activePannel === "projectDashboard" ? style.mobileNavItemActive : ""}`}
+            >
+              <svg
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+            </button>
+
+            <button
+              onClick={() => setActivePanel("collaborators")}
+              className={`${style.mobileNavItem} ${activePannel === "collaborators" ? style.mobileNavItemActive : ""}`}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              {totalmembers > 0 && (
+                <span className={style.mobileNavBadge}>{totalmembers}</span>
+              )}
+            </button>
+
+            {myRole === "OWNER" && (
+              <button
+                onClick={() => setActivePanel("settings")}
+                className={`${style.mobileNavItem} ${activePannel === "settings" ? style.mobileNavItemActive : ""}`}
+              >
+                <svg
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* FAB — open_in_ide(), sibling of the island so the mask doesn't clip it */}
+          <button
+            onClick={() => router.push(`/editor/${projectId}`)}
+            className={style.mobileNavFab}
+            aria-label="open in ide"
+          >
+            <svg
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8 9l-3 3 3 3m8-6l3 3-3 3m-6 3l4-12"
+              />
+            </svg>
+          </button>
         </div>
 
         {/* Status-Bar */}
