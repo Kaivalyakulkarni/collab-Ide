@@ -1,38 +1,29 @@
-import git from 'isomorphic-git'
-import * as fs from 'fs'
-import { prisma } from "@/lib/db";
-import { NextRequest } from "next/server";
+import { prisma } from "@/lib/db"
+import { auth } from "@/auth"
+import { NextResponse } from "next/server"
+import { performGithubCommit } from "@/lib/githubSync"
 
+export const POST = auth(async (req, context: any) => {
+    const session = req.auth
+    if (!session?.user?.id) return new NextResponse("Unauthorized", { status: 401 })
 
-export async function POST(
-    request: NextRequest,
-    context: { params: Promise<{ projectId: string }> }
-) {
-    const { projectId } = await context.params;
+    const { projectId } = await context.params
+    const { message } = await req.json()
 
-    try {
-        const dir = `/tmp/project-${projectId}/`;
-
-        const { message } = await request.json();
-
-        const files = await prisma.file.findMany({
-            where: { projectId },
-        });
-
-        await fs.promises.mkdir(dir, { recursive: true });
-
-        for (const file of files) {
-                const filePath = `${dir}${file.name}`;
-                await fs.promises.writeFile(filePath, file.content ?? "");
-                await git.add({fs,dir,filepath: file.name})
-        }
-        await git.commit({ fs, dir, message, author: { name: 'User', email: 'user@collabide.com' } });
-        return new Response(JSON.stringify({ message: "Changes committed successfully" }), { status: 200 });
-        
-    } catch (error) {
-        if ((error as any).code === 'NOT_FOUND') {
-            return new Response(JSON.stringify({ error: "Git repository not found. Please initialize the repository first." }), { status: 404 });
-        }
-        return new Response(JSON.stringify({ error: "Failed to commit changes" }), { status: 500 });
+    if (!message?.trim()) {
+        return NextResponse.json({ error: "Commit message required" }, { status: 400 })
     }
-}   
+
+    const membership = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: session.user.id } },
+    })
+    if (!membership) return new NextResponse("Forbidden", { status: 403 })
+
+    const result = await performGithubCommit({ projectId, message: message.trim() })
+
+    if (!result.success) {
+        return NextResponse.json({ error: result.error }, { status: 400 })
+    }
+
+    return NextResponse.json(result)
+})

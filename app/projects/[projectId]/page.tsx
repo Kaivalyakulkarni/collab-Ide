@@ -1695,6 +1695,91 @@ export default function ProjectDetailsPage() {
                   </div>
                 ) : (
                   <>
+                    {/* Link to GitHub */}
+                    {!project?.githubFullName && (
+                      <div
+                        className={style.panel}
+                        style={{ marginBottom: "16px" }}
+                      >
+                        <div className={style.panelHeader}>
+                          <div className={style.panelTitle}>github_sync</div>
+                        </div>
+                        <div
+                          style={{
+                            padding: "16px 20px",
+                            fontFamily: "var(--font-jetbrains-mono)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: "10px",
+                              color: "#7F8C8D",
+                              marginBottom: "12px",
+                            }}
+                          >
+                            // link_to_github() — creates a private repo and
+                            syncs your current files
+                          </div>
+                          <button
+                            onClick={async () => {
+                              const res = await fetch(
+                                `/api/projects/${projectId}/github/link`,
+                                { method: "POST" },
+                              );
+                              const data = await res.json();
+                              if (res.ok) {
+                                refreshProject();
+                              } else {
+                                alert(data?.error || "Failed to link GitHub");
+                              }
+                            }}
+                            style={{
+                              background: "#BDC3C7",
+                              color: "#000",
+                              border: "none",
+                              padding: "6px 16px",
+                              borderRadius: "3px",
+                              fontSize: "11px",
+                              fontWeight: "700",
+                              cursor: "pointer",
+                              fontFamily: "var(--font-jetbrains-mono)",
+                            }}
+                          >
+                            link_to_github()
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {project?.githubFullName && (
+                      <div
+                        className={style.panel}
+                        style={{ marginBottom: "16px" }}
+                      >
+                        <div className={style.panelHeader}>
+                          <div className={style.panelTitle}>github_sync</div>
+                        </div>
+                        <div
+                          style={{
+                            padding: "16px 20px",
+                            fontFamily: "var(--font-jetbrains-mono)",
+                            fontSize: "11px",
+                            color: "#4ade80",
+                          }}
+                        >
+                          ✓ linked to{" "}
+                          <a
+                            href={`https://github.com/${project.githubFullName}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ color: "#60a5fa" }}
+                          >
+                            {project.githubFullName}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Change Status */}
                     <div
                       className={style.panel}

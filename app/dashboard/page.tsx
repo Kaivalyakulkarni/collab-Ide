@@ -6,6 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import styles from "../landing.module.css";
 import style from "./dashboard.module.css";
 import Loader from "@/components/Loader";
+import { slugifyRepoName } from "@/lib/githubUtils";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -26,6 +27,9 @@ export default function Dashboard() {
 
   const [isCreating, setIsCreating] = useState(false);
 
+  const [createGithubRepo, setCreateGithubRepo] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
   const [filter, setFilter] = useState("all");
 
   const filteredProjects =
@@ -33,31 +37,53 @@ export default function Dashboard() {
 
   const [aiCompletions, setAiCompletions] = useState(true);
 
+  const [githubStatus, setGithubStatus] = useState<{
+    connected: boolean;
+    githubLogin: string | null;
+  }>({
+    connected: false,
+    githubLogin: null,
+  });
+
   const [theme, setTheme] = useState("dark");
 
   const handleCreateProject = async () => {
     if (!newProjectName.trim()) return;
 
     setIsCreating(true);
+    setCreateError(null);
 
-    fetch("/api/projects", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: newProjectName,
-        description: newProjectDesc,
-      }),
-    })
-      .then((res) => res.json())
-      .then((newProject) => {
-        setProjects((prev) => [...prev, newProject]);
-        setShowModal(false);
-        setNewProjectName("");
-        setNewProjectDesc("");
-        setIsCreating(false);
-        setActivePanel("projects");
-        setFilter("active");
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newProjectName,
+          description: newProjectDesc,
+          createGithubRepo: createGithubRepo && githubStatus.connected,
+        }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setCreateError(data?.error || "Failed to create project");
+        setIsCreating(false);
+        return;
+      }
+
+      setProjects((prev) => [...prev, data]);
+      setShowModal(false);
+      setNewProjectName("");
+      setNewProjectDesc("");
+      setCreateGithubRepo(false);
+      setIsCreating(false);
+      setActivePanel("projects");
+      setFilter("active");
+    } catch (err) {
+      setCreateError("Network error — please try again");
+      setIsCreating(false);
+    }
   };
 
   useEffect(() => {
@@ -73,6 +99,13 @@ export default function Dashboard() {
     }
     return () => document.removeEventListener("click", handleClickOutside);
   }, [userMenuOpen]);
+
+  useEffect(() => {
+    fetch("/api/github/status")
+      .then((res) => res.json())
+      .then((data) => setGithubStatus(data))
+      .catch((err) => console.error("github status fetch error:", err));
+  }, []);
 
   useEffect(() => {
     fetch("/api/projects")
@@ -967,6 +1000,56 @@ export default function Dashboard() {
                 </label>
               </div>
 
+              {/* GitHub connection */}
+              <div className={style.settingItem}>
+                <div
+                  className={style.settingInfo}
+                  style={{
+                    fontFamily: "var(--font-jetbrains-mono), monospace",
+                  }}
+                >
+                  <div className={style.settingLabel}>github</div>
+                  <div className={style.settingSublabel}>
+                    {githubStatus.connected
+                      ? `connected as @${githubStatus.githubLogin}`
+                      : "connect your GitHub account to import repos and sync commits"}
+                  </div>
+                </div>
+                {githubStatus.connected ? (
+                  <div
+                    style={{
+                      background: "rgba(74,222,128,0.1)",
+                      color: "#4ade80",
+                      border: "1px solid rgba(74,222,128,0.3)",
+                      padding: "8px 16px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                    }}
+                  >
+                    ✓ connected
+                  </div>
+                ) : (
+                  <a
+                    href="/api/github/connect"
+                    style={{
+                      background: "#1a1a1a",
+                      color: "#ECF0F1",
+                      border: "1px solid #252525",
+                      padding: "8px 16px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      fontFamily: "var(--font-jetbrains-mono), monospace",
+                      cursor: "pointer",
+                      textDecoration: "none",
+                      display: "inline-block",
+                    }}
+                  >
+                    connect_github()
+                  </a>
+                )}
+              </div>
+
               {/* fourth field */}
               <div className={`${style.settingItem}`}>
                 <div
@@ -1136,7 +1219,6 @@ export default function Dashboard() {
 
       {/* Modal */}
       {showModal && (
-        // layer1-overlay
         <div
           style={{
             position: "fixed",
@@ -1150,7 +1232,6 @@ export default function Dashboard() {
           }}
           onClick={() => setShowModal(false)}
         >
-          {/* layer2-overlay */}
           <div
             style={{
               background: "#0a0a0a",
@@ -1175,6 +1256,7 @@ export default function Dashboard() {
             >
               {"// new_project()"}
             </div>
+
             <input
               type="text"
               placeholder="project_name"
@@ -1191,7 +1273,8 @@ export default function Dashboard() {
                 width: "100%",
                 outline: "none",
               }}
-            ></input>
+            />
+
             <input
               type="text"
               placeholder="project_description (optional)"
@@ -1208,7 +1291,94 @@ export default function Dashboard() {
                 width: "100%",
                 outline: "none",
               }}
-            ></input>
+            />
+
+            {/* GitHub repo checkbox */}
+            <div style={{ width: "100%" }}>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "12px",
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                  color: githubStatus.connected ? "#ECF0F1" : "#555",
+                  cursor: githubStatus.connected ? "pointer" : "not-allowed",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={createGithubRepo}
+                  disabled={!githubStatus.connected}
+                  onChange={(e) => setCreateGithubRepo(e.target.checked)}
+                  style={{
+                    cursor: githubStatus.connected ? "pointer" : "not-allowed",
+                  }}
+                />
+                also create a private GitHub repository
+              </label>
+
+              {!githubStatus.connected && (
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "#7F8C8D",
+                    marginTop: "6px",
+                    paddingLeft: "24px",
+                  }}
+                >
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowModal(false);
+                      setActivePanel("settings");
+                    }}
+                    style={{ color: "#60a5fa", textDecoration: "underline" }}
+                  >
+                    connect your GitHub account
+                  </a>{" "}
+                  first to enable this
+                </div>
+              )}
+
+              {githubStatus.connected &&
+                createGithubRepo &&
+                newProjectName.trim() && (
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#7F8C8D",
+                      marginTop: "6px",
+                      paddingLeft: "24px",
+                    }}
+                  >
+                    → will create:{" "}
+                    <span style={{ color: "#4ade80" }}>
+                      github.com/{githubStatus.githubLogin}/
+                      {slugifyRepoName(newProjectName)}
+                    </span>
+                  </div>
+                )}
+            </div>
+
+            {createError && (
+              <div
+                style={{
+                  width: "100%",
+                  fontSize: "11px",
+                  color: "#f87171",
+                  background: "rgba(248,113,113,0.1)",
+                  border: "1px solid rgba(248,113,113,0.3)",
+                  borderRadius: "4px",
+                  padding: "8px 12px",
+                  fontFamily: "var(--font-jetbrains-mono), monospace",
+                }}
+              >
+                {createError}
+              </div>
+            )}
+
             <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
               <button
                 style={{
@@ -1221,7 +1391,10 @@ export default function Dashboard() {
                   border: "none",
                   cursor: "pointer",
                 }}
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setCreateError(null);
+                }}
               >
                 cancel
               </button>
