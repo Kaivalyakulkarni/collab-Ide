@@ -16,7 +16,7 @@ export const POST = auth(async (req, context: any) => {
     })
     if (!project) return new NextResponse("Not found", { status: 404 })
 
-    const membership = project.members.find(m => m.userId === session.user.id)
+    const membership = project.members.find(m => m.userId === session.user?.id!)
     if (!membership || membership.role !== "OWNER") {
         return new NextResponse("Only the project owner can link GitHub", { status: 403 })
     }
