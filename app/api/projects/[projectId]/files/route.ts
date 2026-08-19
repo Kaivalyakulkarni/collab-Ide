@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { NextRequest } from "next/server";
+import { NextRequest } from "next/server"; 
 
 const buildTree = (flatFiles: any[]): any[] => {
     const root: any[] = []
