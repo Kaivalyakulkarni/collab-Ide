@@ -3,32 +3,43 @@ import { prisma } from "@/lib/db";
 import { NextRequest } from "next/server"; 
 
 const buildTree = (flatFiles: any[]): any[] => {
-    const root: any[] = []
-    const map: { [path: string]: any } = {}
+  const root: any[] = [];
+  const map: { [path: string]: any } = {};
 
-    // first pass — build a map of path -> node
-    const sorted = [...flatFiles].sort((a, b) => a.path.length - b.path.length)
-    
-    for (const file of sorted) {
-        map[file.path] = { ...file, children: file.type === "folder" ? [] : undefined }
+  const sorted = [...flatFiles].sort(
+    (a, b) => a.path.split("/").length - b.path.split("/").length,
+  );
+
+  for (const file of sorted) {
+    const parts = file.path.split("/").filter(Boolean);
+    let currentPath = "";
+    let parentChildren = root;
+
+    // walk/create every ancestor folder along this file's path
+    for (let i = 0; i < parts.length - 1; i++) {
+      currentPath = currentPath ? `${currentPath}/${parts[i]}` : parts[i];
+      if (!map[currentPath]) {
+        const folderNode = {
+          id: currentPath,
+          name: parts[i],
+          type: "folder",
+          path: currentPath,
+          children: [],
+        };
+        map[currentPath] = folderNode;
+        parentChildren.push(folderNode);
+      }
+      parentChildren = map[currentPath].children;
     }
 
-    // second pass — attach children to parents
-    for (const file of sorted) {
-        const parts = file.path.split("/").filter(Boolean)
-        if (parts.length === 1) {
-            root.push(map[file.path])
-        } else {
-            const parentPath = "/" + parts.slice(0, -1).join("/")
-            if (map[parentPath]) {
-                map[parentPath].children = map[parentPath].children || []
-                map[parentPath].children.push(map[file.path])
-            }
-        }
-    }
+    // now place the file (or a real folder row) itself under its parent
+    const node = { ...file, children: file.type === "folder" ? [] : undefined };
+    map[file.path] = node;
+    parentChildren.push(node);
+  }
 
-    return root
-}
+  return root;
+};
 
 export async function GET(
   request: NextRequest,

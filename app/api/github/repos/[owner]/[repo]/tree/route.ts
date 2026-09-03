@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
 export const GET = auth(async (req, context: any) => {
-  const session = req.auth;
+  const session = req.auth; 
   if (!session?.user?.id) {
     return new NextResponse("Unauthorized", { status: 401 });
   }

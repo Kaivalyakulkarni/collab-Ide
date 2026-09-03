@@ -1,4 +1,4 @@
-type TreeNode = {
+export type TreeNode = {
   name: string;
   path: string;
   type: "file" | "folder";
@@ -21,10 +21,10 @@ const JUNK_FOLDERS = new Set([
   "vendor",
   "target",
 ]);
- 
+
 export function buildTree(
   entries: { path: string; type: "file" | "folder"; sha: string }[],
-): TreeNode[] {
+): { roots: TreeNode[]; nodeMap: Map<string, TreeNode> } {
   const nodeMap = new Map<string, TreeNode>();
   const roots: TreeNode[] = [];
 
@@ -50,13 +50,59 @@ export function buildTree(
     if (parentPath) {
       const parentNode = nodeMap.get(parentPath);
       parentNode?.children?.push(node);
-    }else{
-        roots.push(node);
+    } else {
+      roots.push(node);
     }
   }
-  return roots;
+  return { roots, nodeMap };
 }
 
 function isJunkPath(path: string): boolean {
-    return path.split("/").some((segment) => JUNK_FOLDERS.has(segment));
+  return path.split("/").some((segment) => JUNK_FOLDERS.has(segment));
+}
+
+
+function recomputeFolderState(
+  folder: TreeNode,
+): "checked" | "unchecked" | "partial" {
+  if (!folder.children || folder.children.length === 0) {
+    return folder.checked; // shouldn't normally happen for a folder, but guard anyway
+  }
+
+  const allChecked = folder.children.every((c) => c.checked === "checked");
+  const allUnchecked = folder.children.every((c) => c.checked === "unchecked");
+
+  if (allChecked) return "checked";
+  if (allUnchecked) return "unchecked";
+  return "partial";
+}
+
+
+function setAllDescendants(
+  node: TreeNode,
+  checked: "checked" | "unchecked",
+): void {
+  node.checked = checked;
+  node.children?.forEach((child) => setAllDescendants(child, checked));
+}
+
+export function toggleNode(
+  nodeMap: Map<string, TreeNode>,
+  targetPath: string,
+  newChecked: "checked" | "unchecked",
+): void {
+  const target = nodeMap.get(targetPath);
+  if (!target) return;
+
+  // Step 1: cascade down (no-op for files, since they have no children)
+  setAllDescendants(target, newChecked);
+
+  // Step 2: walk up ancestors, nearest first, recomputing each
+  let currentPath = targetPath;
+  while (currentPath.includes("/")) {
+    currentPath = currentPath.split("/").slice(0, -1).join("/");
+    const ancestor = nodeMap.get(currentPath);
+    if (!ancestor) break;
+    ancestor.checked = recomputeFolderState(ancestor);
+  }
 }

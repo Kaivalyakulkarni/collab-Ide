@@ -7,6 +7,7 @@ import styles from "../landing.module.css";
 import style from "./dashboard.module.css";
 import Loader from "@/components/Loader";
 import { slugifyRepoName } from "@/lib/githubUtils";
+import ImportRepoModal from "@/components/ImportRepoModal";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -20,6 +21,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
@@ -535,6 +538,7 @@ export default function Dashboard() {
                     style={{
                       fontFamily: "var(--font-jetbrains-mono),monospace",
                     }}
+                    onClick={() => setShowImportModal(true)}
                   >
                     import_repo()
                   </button>
@@ -1418,6 +1422,16 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {showImportModal && (
+        <ImportRepoModal
+          onClose={() => setShowImportModal(false)}
+          onImport={(projectId) => {
+            setShowImportModal(false);
+            router.push(`/projects/${projectId}`);
+          }}
+        />
       )}
     </div>
   );
