@@ -26,11 +26,17 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 // ============================================================
 
 function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(false);
+  // Lazy-init from window when available, so the very first client render
+  // already knows it's mobile instead of assuming desktop for one tick —
+  // avoids a brief flash where mobile-only logic (like skipping the footer's
+  // scroll-fade below) hasn't kicked in yet.
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < breakpoint : false
+  );
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < breakpoint);
-    check(); // run once on mount — client only, avoids SSR "window is not defined"
+    check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, [breakpoint]);
@@ -1288,24 +1294,39 @@ const MOBILE_PANELS = [MobileEditorPanel, MobileDashboardPanel, MobileTerminalPa
 
 function MobileWorkspace() {
   return (
-    <div style={{ padding: "60px 20px", display: "flex", flexDirection: "column", gap: 56 }}>
+    <div style={{ padding: "56px 22px 88px", display: "flex", flexDirection: "column", gap: 72 }}>
       {SECTIONS.map((s, i) => {
         const Panel = MOBILE_PANELS[i];
+        const isLast = i === SECTIONS.length - 1;
         return (
-          <div key={i} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B" }}>
-              {s.label}
+          <div key={i}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#F59E0B" }}>
+                {s.label}
+              </div>
+              <h2 style={{
+                fontFamily: "var(--font-geist-pixel-circle)", fontWeight: 500,
+                fontSize: "clamp(1.6rem, 7vw, 2.2rem)", color: "#ECF0F1", lineHeight: 1.2,
+                margin: 0,
+              }}>
+                {s.heading}
+              </h2>
+              <p style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#7F8C8D",
+                lineHeight: 1.75, margin: 0, maxWidth: "34ch",
+              }}>
+                {s.description}
+              </p>
+              <div style={{ marginTop: 6 }}>
+                <Panel />
+              </div>
             </div>
-            <h2 style={{
-              fontFamily: "var(--font-geist-pixel-circle)", fontWeight: 500,
-              fontSize: "clamp(1.7rem, 7vw, 2.3rem)", color: "#ECF0F1", lineHeight: 1.15,
-            }}>
-              {s.heading}
-            </h2>
-            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: "#7F8C8D", lineHeight: 1.7 }}>
-              {s.description}
-            </p>
-            <Panel />
+            {!isLast && (
+              <div style={{
+                marginTop: 56, height: 1,
+                background: "linear-gradient(to right, transparent, #1a1a1a 20%, #1a1a1a 80%, transparent)",
+              }} />
+            )}
           </div>
         );
       })}
@@ -1424,8 +1445,21 @@ function FooterLink({ label, href }: { label: string; href: string }) {
 function Footer() {
   const footerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   useGSAP(() => {
+    if (isMobile) {
+      // The scroll-linked fade below relies on ScrollTrigger measuring
+      // footerRef's position against the viewport. On mobile the wrapper's
+      // height is now content-driven (fixed as part of the overflow fix),
+      // which shifts that measurement around and made the trigger point
+      // effectively unreachable — the content just stayed at opacity 0
+      // forever. Mobile doesn't need a scroll-tied reveal here the way the
+      // desktop's pinned 3D scene does, so just show it immediately.
+      gsap.set(contentRef.current, { opacity: 1, y: 0 });
+      return;
+    }
+
     gsap.fromTo(contentRef.current,
       { opacity: 0, y: 30 },
       {
@@ -1437,7 +1471,7 @@ function Footer() {
         },
       }
     );
-  }, []);
+  }, [isMobile]);
 
   const cols = [
     {
@@ -1593,8 +1627,24 @@ function Footer() {
         a:hover .footer-prefix { opacity: 1 !important; }
 
         @media (max-width: 768px) {
-          .footer-content { padding: 40px 20px 0 20px !important; gap: 24px; }
-          .footer-cols { grid-template-columns: 1fr !important; gap: 24px !important; }
+          /* The desktop layout pins .footer-content with position:absolute
+             + inset:0 inside a 100vh wrapper with overflow:hidden. On mobile
+             the columns stack to 1-per-row (below) and need far more vertical
+             space than 100vh — with the absolute+hidden setup that overflow
+             was being silently clipped, which is why the footer links were
+             invisible. Switching to a normal flow layout lets the wrapper
+             grow to fit its content instead of clipping it. */
+          #footer-wrapper {
+            min-height: auto !important;
+            overflow: visible !important;
+          }
+          .footer-content {
+            position: relative !important;
+            inset: auto !important;
+            padding: 48px 22px 40px 22px !important;
+            gap: 40px;
+          }
+          .footer-cols { grid-template-columns: 1fr !important; gap: 32px !important; }
         }
       `}</style>
     </div>
@@ -1691,7 +1741,7 @@ export default function Page() {
       <HeroSection />
 
       <div id="stack-section" style={{
-        marginTop: 100,
+        marginTop: isMobile ? 48 : 100,
         background: "#05050511",
         borderTop: "1px solid #1a1a1a",
         borderBottom: "1px solid #1a1a1a",
